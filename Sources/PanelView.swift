@@ -222,7 +222,7 @@ struct PanelView: View {
                     .labelsHidden()
                     .controlSize(.small)
             }
-            settingsRow("Intervalo", value: "\(store.settings.intervalMin) min") {
+            settingsRow("Espaço mínimo", value: "\(store.settings.intervalMin) min") {
                 Stepper("", value: store.binding(\.intervalMin), in: 15...240, step: 15)
                     .labelsHidden()
                     .controlSize(.small)
