@@ -79,6 +79,12 @@ struct HydrationLog {
         return String(format: "%04d-%02d-%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
     }
 
+    /// ml do dia depois de "+1 garrafa" (`delta` 1) ou "−1" (`delta` −1): soma ou
+    /// subtrai `bottleML` por garrafa, sem passar abaixo de zero.
+    static func ml(_ currentML: Int, adding delta: Int, bottleML: Int) -> Int {
+        max(0, currentML + delta * bottleML)
+    }
+
     /// Ajustes propostos corrigidos para uma janela válida: início sempre antes do fim,
     /// dentro de 0–23. O campo que mudou é o que cede: subir o início até o fim trava
     /// o início uma hora antes; baixar o fim até o início trava o fim uma hora depois.
