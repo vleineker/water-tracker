@@ -8,7 +8,7 @@ final class NotificationManager: NSObject {
     static let shared = NotificationManager()
 
     static let categoryId = "REMINDER"
-    static let reminderRequestId = "gota.reminder"
+    nonisolated static let testRequestId = "gota.test"
     private static let drinkActionId = "DRINK"
     private static let snoozeActionId = "SNOOZE"
 
@@ -42,6 +42,8 @@ final class NotificationManager: NSObject {
         center.requestAuthorization(options: [.alert, .sound]) { [weak self] _, _ in
             Task { @MainActor in
                 self?.refreshStatus()
+                // Agendamentos feitos antes da permissão falham; refaz com ela.
+                ReminderScheduler.shared.recompute()
             }
         }
     }
@@ -59,40 +61,27 @@ final class NotificationManager: NSObject {
         }
     }
 
-    func postReminder() {
-        let log = HydrationStore.shared.log
-        let count = log.todayBottles
-        let goal = log.settings.goalBottles
-        let title = "Hora de beber água"
-        let body = "Você bebeu \(count) de \(goal) garrafas hoje."
-
+    /// Texto do lembrete, montado na hora de agendar.
+    static func reminderContent(bottles: Int, goal: Int) -> UNNotificationContent {
         let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
+        content.title = "Hora de beber água"
+        content.body = "Você bebeu \(bottles) de \(goal) garrafas hoje."
         content.sound = .default
-        content.categoryIdentifier = Self.categoryId
-
-        let request = UNNotificationRequest(
-            identifier: Self.reminderRequestId,
-            content: content,
-            trigger: nil
-        )
-
-        UNUserNotificationCenter.current().add(request) { error in
-            if error != nil {
-                Task { @MainActor in
-                    NotificationManager.fallbackNotify(title: title, body: body)
-                }
-            }
-        }
+        content.categoryIdentifier = categoryId
+        return content
     }
 
-    private static func fallbackNotify(title: String, body: String) {
-        let script = "display notification \"\(body)\" with title \"\(title)\""
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-        try? process.run()
+    /// Botão "Testar lembrete": entrega na hora, fora do ritmo e sem contar como lembrete.
+    func postReminder() {
+        let log = HydrationStore.shared.log
+        let request = UNNotificationRequest(
+            identifier: Self.testRequestId,
+            content: Self.reminderContent(bottles: log.todayBottles, goal: log.settings.goalBottles),
+            trigger: nil
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error { NSLog("Gota: falha no lembrete de teste: \(error.localizedDescription)") }
+        }
     }
 }
 
@@ -111,7 +100,12 @@ extension NotificationManager: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let actionId = response.actionIdentifier
+        let deliveredAt = response.notification.date
+        let isTest = response.notification.request.identifier == NotificationManager.testRequestId
         Task { @MainActor in
+            if !isTest {
+                ReminderScheduler.shared.noteDelivered(at: deliveredAt)
+            }
             switch actionId {
             case NotificationManager.drinkActionId:
                 HydrationStore.shared.add(1)
