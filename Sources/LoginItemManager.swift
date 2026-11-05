@@ -20,6 +20,16 @@ enum LoginItemManager {
     /// Liga/desliga o login item. Retorna uma mensagem de erro para a UI, ou nil se ok.
     @discardableResult
     static func setEnabled(_ enabled: Bool) -> String? {
+        if let fallback = LaunchAgentFallback.pathToRemove(
+            enabled: enabled, home: NSHomeDirectory(),
+            fileExists: { FileManager.default.fileExists(atPath: $0) }
+        ) {
+            do {
+                try FileManager.default.removeItem(atPath: fallback)
+            } catch {
+                return "Não foi possível remover \(fallback): \(error.localizedDescription)"
+            }
+        }
         do {
             if enabled {
                 if status != .enabled {
@@ -58,14 +68,8 @@ enum LoginItemManager {
 
     /// Fallback apenas se SMAppService.register() falhar.
     private static func registerFallbackLaunchAgent() -> Bool {
-        let appPath = Bundle.main.bundlePath
-        let agentsDir = NSHomeDirectory() + "/Library/LaunchAgents"
-        let plistPath = agentsDir + "/com.vleineker.gota.plist"
-        let plist: [String: Any] = [
-            "Label": "com.vleineker.gota",
-            "ProgramArguments": ["/usr/bin/open", "-a", appPath],
-            "RunAtLoad": true
-        ]
+        let plistPath = LaunchAgentFallback.plistPath(home: NSHomeDirectory())
+        let plist = LaunchAgentFallback.contents(appPath: Bundle.main.bundlePath)
         guard let data = try? PropertyListSerialization.data(
             fromPropertyList: plist, format: .xml, options: 0
         ) else {
@@ -73,7 +77,8 @@ enum LoginItemManager {
         }
         do {
             try FileManager.default.createDirectory(
-                atPath: agentsDir, withIntermediateDirectories: true
+                atPath: (plistPath as NSString).deletingLastPathComponent,
+                withIntermediateDirectories: true
             )
             try data.write(to: URL(fileURLWithPath: plistPath))
             return true
