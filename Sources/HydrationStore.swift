@@ -30,6 +30,7 @@ final class HydrationStore {
     @ObservationIgnored private var importedFiles: [String]
     /// Garrafas ainda não enviadas ao Garmin, na ordem do registro.
     private(set) var garminQueue: [GarminPending]
+    @ObservationIgnored private var garminLastRead: GarminRead?
     /// Evita duas leituras da pasta do iPhone ao mesmo tempo.
     @ObservationIgnored private var importingPhoneInbox = false
     @ObservationIgnored private var phoneInboxTimer: Timer?
@@ -52,6 +53,7 @@ final class HydrationStore {
         self.metGoal = loaded.metGoal
         self.importedFiles = loaded.importedFiles
         self.garminQueue = loaded.garminQueue
+        self.garminLastRead = loaded.garminLastRead
         self.today = Self.calendar.startOfDay(for: Date())
 
         NotificationCenter.default.addObserver(
@@ -114,11 +116,18 @@ final class HydrationStore {
         let wasGarminEnabled = settings.garminEnabled
         settings = HydrationLog.validated(newSettings, from: settings)
         refreshDay()
+        let switchedOn = settings.garminEnabled && !wasGarminEnabled
+        if switchedOn, let entry = GarminSync.catchUp(
+            todayML: mlByDay[todayKey] ?? 0, todayKey: todayKey, lastRead: garminLastRead,
+            queue: garminQueue, at: Date(), calendar: Self.calendar, id: UUID().uuidString
+        ) {
+            garminQueue.append(entry)
+        }
         // Meta nova vale para hoje na hora, sem esperar a próxima garrafa.
         recordTodayGoal()
         persist()
         onChange?()
-        if settings.garminEnabled && !wasGarminEnabled { onGarminWork?(.switchedOn) }
+        if switchedOn { onGarminWork?(.switchedOn) }
     }
 
     // MARK: - Garmin
@@ -137,8 +146,10 @@ final class HydrationStore {
     func applyGarminToday(_ garminML: Int, dayKey: String) {
         refreshDay()
         guard dayKey == todayKey else { return }
+        let read = GarminRead(dayKey: dayKey, ml: garminML)
         let total = GarminSync.todayTotal(garminML: garminML, queue: garminQueue, todayKey: todayKey)
-        guard total != (mlByDay[todayKey] ?? 0) else { return }
+        guard total != (mlByDay[todayKey] ?? 0) || read != garminLastRead else { return }
+        garminLastRead = read
         mlByDay[todayKey] = total
         recordTodayGoal()
         trimHistory()
@@ -230,7 +241,7 @@ final class HydrationStore {
     private func persist() {
         Self.write(PersistedState(
             settings: settings, mlByDay: mlByDay, metGoal: metGoal,
-            importedFiles: importedFiles, garminQueue: garminQueue
+            importedFiles: importedFiles, garminQueue: garminQueue, garminLastRead: garminLastRead
         ))
     }
 

@@ -87,6 +87,51 @@ struct GarminQueueTests {
     }
 }
 
+@Suite("Ligar o Garmin no meio do dia")
+struct GarminCatchUpTests {
+    let today = "2026-11-05"
+
+    private func catchUp(_ todayML: Int, lastRead: GarminRead? = nil, queue: [GarminPending] = []) -> GarminPending? {
+        GarminSync.catchUp(todayML: todayML, todayKey: today, lastRead: lastRead, queue: queue,
+                           at: at(5, 15), calendar: saoPaulo, id: "seed")
+    }
+
+    @Test func bottlesAlreadyTodayGoAsOneEntryNow() {
+        let seed = catchUp(1000)
+        #expect(seed == item("seed", 1000, "2026-11-05T15:00:00"))
+        // Primeira leitura: Garmin com 0 e o registro único ainda na fila → nada some.
+        #expect(GarminSync.todayTotal(garminML: 0, queue: [seed!], todayKey: today) == 1000)
+    }
+
+    @Test func emptyDaySendsNothing() {
+        #expect(catchUp(0) == nil)
+    }
+
+    @Test func switchingOffAndOnAgainDoesNotResend() {
+        // Ligou, mandou 1000 e leu 1000 do Garmin; desligou e ligou sem mudar nada.
+        #expect(catchUp(1000, lastRead: GarminRead(dayKey: today, ml: 1000)) == nil)
+    }
+
+    @Test func switchingOnAgainSendsOnlyWhatChangedWhileOff() {
+        let read = GarminRead(dayKey: today, ml: 1000)
+        #expect(catchUp(1500, lastRead: read)?.ml == 500)
+        // Um "−1" com o interruptor desligado vira registro negativo.
+        #expect(catchUp(500, lastRead: read)?.ml == -500)
+    }
+
+    @Test func entryStillQueuedIsNotSentTwice() {
+        // Ligou, o envio falhou (sem rede), desligou e ligou de novo.
+        let queued = [item("seed", 1000, "2026-11-05T15:00:00")]
+        #expect(catchUp(1000, queue: queued) == nil)
+    }
+
+    @Test func readFromAnotherDayDoesNotCount() {
+        // Leitura de ontem e garrafa do Atalho de ontem na fila: só hoje entra na conta.
+        let queue = [item("y", 500, "2026-11-04T22:00:00")]
+        #expect(catchUp(1000, lastRead: GarminRead(dayKey: "2026-11-04", ml: 2000), queue: queue)?.ml == 1000)
+    }
+}
+
 @Suite("Respostas e erros do ajudante")
 struct GarminReplyTests {
     @Test func getOkReadsML() {
@@ -187,6 +232,7 @@ struct GarminPersistenceTests {
         let state = try JSONDecoder().decode(PersistedState.self, from: Data(old.utf8))
         #expect(state.settings.garminEnabled == false)
         #expect(state.garminQueue.isEmpty)
+        #expect(state.garminLastRead == nil)
         #expect(state.mlByDay == ["2026-11-05": 1000])
     }
 
@@ -201,6 +247,7 @@ struct GarminPersistenceTests {
         var state = PersistedState()
         state.settings.garminEnabled = true
         state.garminQueue = [item("a", 500, "2026-11-05T08:00:00"), item("b", -500, "2026-11-05T09:00:00")]
+        state.garminLastRead = GarminRead(dayKey: "2026-11-05", ml: 1500)
         let reopened = try JSONDecoder().decode(PersistedState.self, from: JSONEncoder().encode(state))
         #expect(reopened == state)
     }

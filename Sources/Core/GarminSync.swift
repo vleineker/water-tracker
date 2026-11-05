@@ -15,6 +15,13 @@ struct GarminPending: Codable, Equatable {
     var dayKey: String { String(localTime.prefix(10)) }
 }
 
+/// Último total de um dia lido do Garmin (`get`). Os nomes dos campos fazem parte do
+/// formato salvo (`gota.state.v2`, campo `garminLastRead`).
+struct GarminRead: Codable, Equatable {
+    let dayKey: String
+    let ml: Int
+}
+
 /// O que pediu a sincronização. Só as agendadas passam por cima da espera depois de
 /// um erro de "tento de novo mais tarde".
 enum GarminTrigger: Equatable {
@@ -137,6 +144,23 @@ enum GarminSync {
             id: id, ml: ml,
             localTime: String(format: "%@T%02d:%02d:%02d", stamp.dayKey, stamp.hour, stamp.minute, stamp.second)
         )
+    }
+
+    /// Registro único ao ligar o interruptor, para o que já estava no Gota hoje não
+    /// sumir quando o total passar a vir do Garmin.
+    ///
+    /// Regra: manda o ml de hoje menos o que o Garmin já tem dele (o último total de
+    /// hoje lido de lá; outro dia ou nenhuma leitura = 0) menos o que de hoje ainda
+    /// está na fila. Desligar e ligar de novo no mesmo dia só manda o que mudou com o
+    /// interruptor desligado (um "−1" nesse meio vira registro negativo). Dias
+    /// anteriores nunca vão.
+    static func catchUp(
+        todayML: Int, todayKey: String, lastRead: GarminRead?, queue: [GarminPending],
+        at date: Date, calendar: Calendar, id: String
+    ) -> GarminPending? {
+        let confirmed = lastRead.map { $0.dayKey == todayKey ? $0.ml : 0 } ?? 0
+        let pending = queue.filter { $0.dayKey == todayKey }.reduce(0) { $0 + $1.ml }
+        return self.pending(ml: todayML - confirmed - pending, at: date, calendar: calendar, id: id)
     }
 
     /// Fila depois de enviar o item `id`: ele só sai com `ok:true`.

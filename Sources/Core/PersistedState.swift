@@ -17,19 +17,23 @@ struct PersistedState: Codable, Equatable {
     /// Garrafas que ainda não foram para o Garmin Connect, na ordem do registro
     /// (ver `GarminSync`). Dado antigo, sem o campo, abre com a fila vazia.
     var garminQueue: [GarminPending] = []
+    /// Último total de hoje lido do Garmin, para ligar o interruptor de novo no mesmo
+    /// dia não mandar outra vez o que já foi (ver `GarminSync.catchUp`).
+    var garminLastRead: GarminRead?
 
     init() {}
 
     init(settings: Settings, mlByDay: [String: Int], metGoal: [String: Bool],
-         importedFiles: [String] = [], garminQueue: [GarminPending] = []) {
+         importedFiles: [String] = [], garminQueue: [GarminPending] = [], garminLastRead: GarminRead? = nil) {
         self.settings = settings
         self.mlByDay = mlByDay
         self.metGoal = metGoal
         self.importedFiles = importedFiles
         self.garminQueue = garminQueue
+        self.garminLastRead = garminLastRead
     }
 
-    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal, importedFiles, garminQueue }
+    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal, importedFiles, garminQueue, garminLastRead }
 
     // Decode tolerante: bloco ausente ou ilegível vira o padrão só naquele bloco,
     // sem derrubar os outros (um `metGoal` estranho não pode zerar o histórico).
@@ -40,6 +44,7 @@ struct PersistedState: Codable, Equatable {
         metGoal = (try? c.decodeIfPresent([String: Bool].self, forKey: .metGoal)) ?? [:]
         importedFiles = (try? c.decodeIfPresent([String].self, forKey: .importedFiles)) ?? []
         garminQueue = (try? c.decodeIfPresent([GarminPending].self, forKey: .garminQueue)) ?? []
+        garminLastRead = (try? c.decodeIfPresent(GarminRead.self, forKey: .garminLastRead)) ?? nil
     }
 }
 
