@@ -11,16 +11,20 @@ struct PersistedState: Codable, Equatable {
     var mlByDay: [String: Int] = [:]
     /// Resultado congelado de cada dia (meta batida ou não), usado pelo streak.
     var metGoal: [String: Bool] = [:]
+    /// Arquivos do Atalho do iPhone já somados (ver `PhoneInbox`). Evita somar de novo
+    /// um arquivo que não pôde ser apagado da pasta.
+    var importedFiles: [String] = []
 
     init() {}
 
-    init(settings: Settings, mlByDay: [String: Int], metGoal: [String: Bool]) {
+    init(settings: Settings, mlByDay: [String: Int], metGoal: [String: Bool], importedFiles: [String] = []) {
         self.settings = settings
         self.mlByDay = mlByDay
         self.metGoal = metGoal
+        self.importedFiles = importedFiles
     }
 
-    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal }
+    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal, importedFiles }
 
     // Decode tolerante: bloco ausente ou ilegível vira o padrão só naquele bloco,
     // sem derrubar os outros (um `metGoal` estranho não pode zerar o histórico).
@@ -29,6 +33,7 @@ struct PersistedState: Codable, Equatable {
         settings = (try? c.decodeIfPresent(Settings.self, forKey: .settings)) ?? Settings()
         mlByDay = (try? c.decodeIfPresent([String: Int].self, forKey: .mlByDay)) ?? [:]
         metGoal = (try? c.decodeIfPresent([String: Bool].self, forKey: .metGoal)) ?? [:]
+        importedFiles = (try? c.decodeIfPresent([String].self, forKey: .importedFiles)) ?? []
     }
 }
 

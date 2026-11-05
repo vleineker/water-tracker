@@ -66,6 +66,7 @@ struct PanelView: View {
         .onAppear {
             NotificationManager.shared.refreshStatus()
             updater.checkIfDue()
+            HydrationStore.shared.importPhoneInbox()
         }
         .onDisappear {
             uiState.settingsExpanded = false

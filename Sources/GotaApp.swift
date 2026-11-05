@@ -32,6 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationManager.shared.configure()
         HydrationStore.shared.onChange = { ReminderScheduler.shared.recompute() }
         ReminderScheduler.shared.start()
+        HydrationStore.shared.startPhoneInbox()
         LoginItemManager.registerDefaultIfFirstLaunch()
     }
 }

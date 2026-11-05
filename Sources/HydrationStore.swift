@@ -4,7 +4,9 @@ import AppKit
 import SwiftUI
 
 /// Só guarda e observa: lê/grava o estado em `gota.state.v2` (migrando a `v1` na
-/// primeira abertura, ver `StateMigration`) e acompanha a troca de dia. Toda regra (meta batida, progresso, streak, validação) mora em `HydrationLog`.
+/// primeira abertura, ver `StateMigration`), acompanha a troca de dia e traz as
+/// garrafas do Atalho do iPhone (`importPhoneInbox`). Toda regra (meta batida,
+/// progresso, streak, validação, arquivos do iPhone) mora no núcleo.
 @MainActor
 @Observable
 final class HydrationStore {
@@ -18,6 +20,11 @@ final class HydrationStore {
     /// ml por dia. As garrafas exibidas saem daqui ÷ `bottleML` atual (no núcleo).
     private(set) var mlByDay: [String: Int]
     private(set) var metGoal: [String: Bool]
+    /// Arquivos do Atalho do iPhone já somados (ver `PhoneInbox`).
+    @ObservationIgnored private var importedFiles: [String]
+    /// Evita duas leituras da pasta do iPhone ao mesmo tempo.
+    @ObservationIgnored private var importingPhoneInbox = false
+    @ObservationIgnored private var phoneInboxTimer: Timer?
     /// Início do dia corrente. Guardado (e não lido do relógio a cada acesso) para a
     /// troca de dia disparar a atualização da interface.
     private(set) var today: Date
@@ -35,6 +42,7 @@ final class HydrationStore {
         self.settings = loaded.settings
         self.mlByDay = loaded.mlByDay
         self.metGoal = loaded.metGoal
+        self.importedFiles = loaded.importedFiles
         self.today = Self.calendar.startOfDay(for: Date())
 
         NotificationCenter.default.addObserver(
@@ -42,10 +50,14 @@ final class HydrationStore {
         ) { [weak self] _ in
             Task { @MainActor in self?.refreshDay() }
         }
-        NotificationCenter.default.addObserver(
+        // O aviso de acordar vem do centro do NSWorkspace, não do `default`.
+        NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.refreshDay() }
+            Task { @MainActor in
+                self?.refreshDay()
+                self?.importPhoneInbox()
+            }
         }
     }
 
@@ -89,6 +101,53 @@ final class HydrationStore {
         onChange?()
     }
 
+    // MARK: - Atalho do iPhone
+
+    /// Lê a pasta do iPhone agora e a cada 15 min. As outras leituras acontecem ao
+    /// acordar o Mac (observador no `init`) e ao abrir o painel (`PanelView`).
+    func startPhoneInbox() {
+        if phoneInboxTimer == nil {
+            let timer = Timer(timeInterval: 15 * 60, repeats: true) { _ in
+                Task { @MainActor in HydrationStore.shared.importPhoneInbox() }
+            }
+            timer.tolerance = 60
+            RunLoop.main.add(timer, forMode: .common)
+            phoneInboxTimer = timer
+        }
+        importPhoneInbox()
+    }
+
+    /// Soma as garrafas gravadas pelo Atalho do iPhone e apaga os arquivos somados.
+    /// Grava o estado antes de apagar: se o app cair no meio, o arquivo que sobrar
+    /// já está em `importedFiles` e não soma de novo.
+    func importPhoneInbox() {
+        guard !importingPhoneInbox else { return }
+        importingPhoneInbox = true
+        Task {
+            let names = await Task.detached { PhoneInboxFolder.fileNames() }.value
+            refreshDay()
+            let outcome = PhoneInbox.importing(
+                names,
+                into: PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal, importedFiles: importedFiles)
+            )
+            if outcome.addedBottles > 0 {
+                mlByDay = outcome.state.mlByDay
+                metGoal = outcome.state.metGoal
+                importedFiles = outcome.state.importedFiles
+                recordTodayGoal()
+                trimHistory()
+                persist()
+                NSLog("Gota: \(outcome.addedBottles) garrafa(s) do iPhone somada(s)")
+                onChange?()
+            }
+            if !outcome.filesToDelete.isEmpty {
+                let files = outcome.filesToDelete
+                await Task.detached { PhoneInboxFolder.delete(files) }.value
+            }
+            importingPhoneInbox = false
+        }
+    }
+
     /// Binding genérico para um campo de Settings — usado pelos Steppers/Toggles do painel.
     func binding<T>(_ keyPath: WritableKeyPath<Settings, T>) -> Binding<T> {
         Binding(
@@ -118,7 +177,7 @@ final class HydrationStore {
     }
 
     private func persist() {
-        Self.write(PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal))
+        Self.write(PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal, importedFiles: importedFiles))
     }
 
     private static func write(_ state: PersistedState) {

@@ -22,6 +22,44 @@ Notificações > Gota**, trocar o estilo de **Banners** para
 **Alertas** — no estilo Banners, as ações ("Bebi uma garrafa" /
 "Lembrar em 15 min") ficam escondidas sob "Opções".
 
+### Registrar pelo iPhone (Atalho)
+
+Longe do Mac, um Atalho do iPhone registra a garrafa gravando um arquivo
+no iCloud Drive. O Mac soma esse arquivo ao dia em que ele foi criado
+(não ao dia em que o Mac leu) e depois apaga o arquivo. Não precisa de
+app no iPhone nem do Garmin.
+
+**Como funciona:** cada garrafa é um arquivo na pasta
+`iCloud Drive/Gota/inbox`, com o horário no nome, no formato
+`2026-11-05T14-32-00.txt`. O conteúdo do arquivo não importa. O Mac lê
+a pasta ao abrir o painel, ao acordar e a cada 15 minutos, e soma uma
+garrafa do tamanho configurado nos Ajustes por arquivo. Arquivo com
+nome fora do formato é ignorado e fica na pasta. A pasta é criada pelo
+próprio Gota na primeira leitura; se ela ainda não aparecer no iPhone,
+crie `Gota/inbox` no app Arquivos, dentro do iCloud Drive.
+
+**Montando o Atalho** (app Atalhos no iPhone, "+" para criar):
+
+1. Ação **Data Atual**.
+2. Ação **Formatar Data**: Formato de Data **Personalizado**, com o
+   formato `yyyy-MM-dd'T'HH-mm-ss` (as aspas simples em volta do `T`
+   fazem parte).
+3. Ação **Texto**, com qualquer conteúdo (por exemplo, `1`).
+4. Ação **Definir Nome**: nome = **Data Formatada** (a variável da
+   etapa 2). Com ou sem `.txt` no fim, o Gota aceita.
+5. Ação **Salvar Arquivo**: desligue **Perguntar Onde Salvar**, escolha
+   a pasta **iCloud Drive › Gota › inbox** e deixe **Substituir Se o
+   Arquivo Existir** desligado (dois toques no mesmo segundo viram
+   duas garrafas).
+6. Dê um nome curto ao Atalho, como "Bebi uma garrafa", e adicione à
+   Tela de Início, ao botão de Ação ou ao Apple Watch.
+
+Para conferir: rode o Atalho, abra o painel do Gota no Mac (com o
+iCloud já sincronizado) e veja a garrafa somada; o arquivo some da
+pasta. O macOS pode pedir permissão para o Gota acessar o iCloud
+Drive na primeira leitura. Se a permissão for negada, o app segue
+funcionando, só sem as garrafas do iPhone.
+
 ## Instalar
 
 ### Pelo código (recomendado se você usa terminal)
