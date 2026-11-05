@@ -14,17 +14,22 @@ struct PersistedState: Codable, Equatable {
     /// Arquivos do Atalho do iPhone já somados (ver `PhoneInbox`). Evita somar de novo
     /// um arquivo que não pôde ser apagado da pasta.
     var importedFiles: [String] = []
+    /// Garrafas que ainda não foram para o Garmin Connect, na ordem do registro
+    /// (ver `GarminSync`). Dado antigo, sem o campo, abre com a fila vazia.
+    var garminQueue: [GarminPending] = []
 
     init() {}
 
-    init(settings: Settings, mlByDay: [String: Int], metGoal: [String: Bool], importedFiles: [String] = []) {
+    init(settings: Settings, mlByDay: [String: Int], metGoal: [String: Bool],
+         importedFiles: [String] = [], garminQueue: [GarminPending] = []) {
         self.settings = settings
         self.mlByDay = mlByDay
         self.metGoal = metGoal
         self.importedFiles = importedFiles
+        self.garminQueue = garminQueue
     }
 
-    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal, importedFiles }
+    private enum CodingKeys: String, CodingKey { case settings, mlByDay, metGoal, importedFiles, garminQueue }
 
     // Decode tolerante: bloco ausente ou ilegível vira o padrão só naquele bloco,
     // sem derrubar os outros (um `metGoal` estranho não pode zerar o histórico).
@@ -34,6 +39,7 @@ struct PersistedState: Codable, Equatable {
         mlByDay = (try? c.decodeIfPresent([String: Int].self, forKey: .mlByDay)) ?? [:]
         metGoal = (try? c.decodeIfPresent([String: Bool].self, forKey: .metGoal)) ?? [:]
         importedFiles = (try? c.decodeIfPresent([String].self, forKey: .importedFiles)) ?? []
+        garminQueue = (try? c.decodeIfPresent([GarminPending].self, forKey: .garminQueue)) ?? []
     }
 }
 

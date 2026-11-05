@@ -9,6 +9,8 @@ struct Settings: Codable, Equatable {
     var intervalMin: Int = 60
     var startHour: Int = 8
     var endHour: Int = 22
+    /// Envia cada garrafa ao Garmin Connect e lê de lá o total de hoje. Desligado de fábrica.
+    var garminEnabled: Bool = false
 }
 
 // Decode tolerante campo a campo: campo ausente (ex.: um ajuste novo que o dado
@@ -17,7 +19,7 @@ struct Settings: Codable, Equatable {
 // init memberwise.
 extension Settings {
     private enum CodingKeys: String, CodingKey {
-        case bottleML, goalBottles, intervalMin, startHour, endHour
+        case bottleML, goalBottles, intervalMin, startHour, endHour, garminEnabled
     }
 
     init(from decoder: Decoder) throws {
@@ -28,5 +30,6 @@ extension Settings {
         intervalMin = (try? c.decodeIfPresent(Int.self, forKey: .intervalMin)) ?? d.intervalMin
         startHour = (try? c.decodeIfPresent(Int.self, forKey: .startHour)) ?? d.startHour
         endHour = (try? c.decodeIfPresent(Int.self, forKey: .endHour)) ?? d.endHour
+        garminEnabled = (try? c.decodeIfPresent(Bool.self, forKey: .garminEnabled)) ?? d.garminEnabled
     }
 }

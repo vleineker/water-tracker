@@ -6,7 +6,10 @@ import SwiftUI
 /// Só guarda e observa: lê/grava o estado em `gota.state.v2` (migrando a `v1` na
 /// primeira abertura, ver `StateMigration`), acompanha a troca de dia e traz as
 /// garrafas do Atalho do iPhone (`importPhoneInbox`). Toda regra (meta batida,
-/// progresso, streak, validação, arquivos do iPhone) mora no núcleo.
+/// progresso, streak, validação, arquivos do iPhone, fila do Garmin) mora no núcleo.
+///
+/// Com o Garmin ligado, cada mudança vira um item de `garminQueue` e o total de hoje
+/// passa a ser o do Garmin mais a fila (`applyGarminToday`). Desligado, a fila não muda.
 @MainActor
 @Observable
 final class HydrationStore {
@@ -15,6 +18,9 @@ final class HydrationStore {
     /// Chamado depois de cada mudança feita pelo usuário (garrafa somada/removida ou
     /// ajuste alterado). O `AppDelegate` liga isto ao agendador de lembretes.
     @ObservationIgnored var onChange: (() -> Void)?
+    /// Chamado quando há algo para levar ao Garmin (garrafa nova, interruptor ligado).
+    /// O `AppDelegate` liga isto ao `GarminSyncer`.
+    @ObservationIgnored var onGarminWork: ((GarminTrigger) -> Void)?
 
     private(set) var settings: Settings
     /// ml por dia. As garrafas exibidas saem daqui ÷ `bottleML` atual (no núcleo).
@@ -22,6 +28,8 @@ final class HydrationStore {
     private(set) var metGoal: [String: Bool]
     /// Arquivos do Atalho do iPhone já somados (ver `PhoneInbox`).
     @ObservationIgnored private var importedFiles: [String]
+    /// Garrafas ainda não enviadas ao Garmin, na ordem do registro.
+    private(set) var garminQueue: [GarminPending]
     /// Evita duas leituras da pasta do iPhone ao mesmo tempo.
     @ObservationIgnored private var importingPhoneInbox = false
     @ObservationIgnored private var phoneInboxTimer: Timer?
@@ -43,6 +51,7 @@ final class HydrationStore {
         self.mlByDay = loaded.mlByDay
         self.metGoal = loaded.metGoal
         self.importedFiles = loaded.importedFiles
+        self.garminQueue = loaded.garminQueue
         self.today = Self.calendar.startOfDay(for: Date())
 
         NotificationCenter.default.addObserver(
@@ -72,7 +81,7 @@ final class HydrationStore {
         )
     }
 
-    private var todayKey: String {
+    var todayKey: String {
         HydrationLog.dayKey(for: today, calendar: Self.calendar)
     }
 
@@ -85,18 +94,54 @@ final class HydrationStore {
 
     func add(_ delta: Int) {
         refreshDay()
-        mlByDay[todayKey] = HydrationLog.ml(mlByDay[todayKey] ?? 0, adding: delta, bottleML: settings.bottleML)
+        let before = mlByDay[todayKey] ?? 0
+        let after = HydrationLog.ml(before, adding: delta, bottleML: settings.bottleML)
+        mlByDay[todayKey] = after
+        var queued = false
+        if settings.garminEnabled,
+           let entry = GarminSync.pending(ml: after - before, at: Date(), calendar: Self.calendar, id: UUID().uuidString) {
+            garminQueue.append(entry)
+            queued = true
+        }
         recordTodayGoal()
         trimHistory()
         persist()
         onChange?()
+        if queued { onGarminWork?(.bottle) }
     }
 
     func updateSettings(_ newSettings: Settings) {
+        let wasGarminEnabled = settings.garminEnabled
         settings = HydrationLog.validated(newSettings, from: settings)
         refreshDay()
         // Meta nova vale para hoje na hora, sem esperar a próxima garrafa.
         recordTodayGoal()
+        persist()
+        onChange?()
+        if settings.garminEnabled && !wasGarminEnabled { onGarminWork?(.switchedOn) }
+    }
+
+    // MARK: - Garmin
+
+    /// Resposta do `add` de um item da fila: ele só sai com `ok:true`.
+    func garminSent(_ id: String, reply: GarminReply) {
+        let updated = GarminSync.queue(garminQueue, afterSending: id, reply: reply)
+        guard updated != garminQueue else { return }
+        garminQueue = updated
+        persist()
+    }
+
+    /// Total de hoje lido do Garmin. Substitui o ml de hoje pelo do Garmin mais o que
+    /// de hoje ainda está na fila, para meta, streak, gota e lembrete contarem também
+    /// o que veio do relógio. A meta continua sendo a do Gota.
+    func applyGarminToday(_ garminML: Int, dayKey: String) {
+        refreshDay()
+        guard dayKey == todayKey else { return }
+        let total = GarminSync.todayTotal(garminML: garminML, queue: garminQueue, todayKey: todayKey)
+        guard total != (mlByDay[todayKey] ?? 0) else { return }
+        mlByDay[todayKey] = total
+        recordTodayGoal()
+        trimHistory()
         persist()
         onChange?()
     }
@@ -128,17 +173,23 @@ final class HydrationStore {
             refreshDay()
             let outcome = PhoneInbox.importing(
                 names,
-                into: PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal, importedFiles: importedFiles)
+                into: PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal, importedFiles: importedFiles, garminQueue: garminQueue)
             )
             if outcome.addedBottles > 0 {
                 mlByDay = outcome.state.mlByDay
                 metGoal = outcome.state.metGoal
                 importedFiles = outcome.state.importedFiles
+                if settings.garminEnabled {
+                    garminQueue += outcome.addedStamps.map {
+                        GarminSync.pending(from: $0, ml: settings.bottleML, id: UUID().uuidString)
+                    }
+                }
                 recordTodayGoal()
                 trimHistory()
                 persist()
                 NSLog("Gota: \(outcome.addedBottles) garrafa(s) do iPhone somada(s)")
                 onChange?()
+                if settings.garminEnabled { onGarminWork?(.bottle) }
             }
             if !outcome.filesToDelete.isEmpty {
                 let files = outcome.filesToDelete
@@ -177,7 +228,10 @@ final class HydrationStore {
     }
 
     private func persist() {
-        Self.write(PersistedState(settings: settings, mlByDay: mlByDay, metGoal: metGoal, importedFiles: importedFiles))
+        Self.write(PersistedState(
+            settings: settings, mlByDay: mlByDay, metGoal: metGoal,
+            importedFiles: importedFiles, garminQueue: garminQueue
+        ))
     }
 
     private static func write(_ state: PersistedState) {

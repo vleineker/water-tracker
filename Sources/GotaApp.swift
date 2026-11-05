@@ -32,7 +32,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationManager.shared.configure()
         HydrationStore.shared.onChange = { ReminderScheduler.shared.recompute() }
         ReminderScheduler.shared.start()
+        HydrationStore.shared.onGarminWork = { GarminSyncer.shared.sync($0) }
         HydrationStore.shared.startPhoneInbox()
+        GarminSyncer.shared.start()
         LoginItemManager.registerDefaultIfFirstLaunch()
     }
 }

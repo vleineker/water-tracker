@@ -30,6 +30,8 @@ enum PhoneInbox {
         var filesToDelete: [String]
         /// Garrafas somadas agora (arquivo repetido não conta).
         var addedBottles: Int
+        /// Horário de cada garrafa somada agora, em ordem, para a fila do Garmin.
+        var addedStamps: [Stamp] = []
     }
 
     /// Lê `yyyy-MM-ddTHH-mm-ss` do começo do nome. Depois do horário pode vir um
@@ -79,6 +81,7 @@ enum PhoneInbox {
         var filesToDelete: [String] = []
         var touchedDays = Set<String>()
         var added = 0
+        var addedStamps: [Stamp] = []
 
         for name in fileNames.sorted() {
             guard let stamp = stamp(fromFileName: name) else { continue }
@@ -90,6 +93,7 @@ enum PhoneInbox {
             )
             touchedDays.insert(stamp.dayKey)
             added += 1
+            addedStamps.append(stamp)
         }
 
         let goalML = state.settings.goalBottles * state.settings.bottleML
@@ -99,6 +103,6 @@ enum PhoneInbox {
         }
         result.importedFiles = Array(result.importedFiles.sorted().suffix(rememberedFilesLimit))
 
-        return Outcome(state: result, filesToDelete: filesToDelete, addedBottles: added)
+        return Outcome(state: result, filesToDelete: filesToDelete, addedBottles: added, addedStamps: addedStamps)
     }
 }
