@@ -51,6 +51,26 @@ cp Resources/Info.plist "$APP_DIR/Contents/Info.plist"
 cp Resources/AppIcon.icns "$APP_DIR/Contents/Resources/AppIcon.icns"
 plutil -lint "$APP_DIR/Contents/Info.plist"
 
+# O app instalado roda o ajudante daqui, sem depender do clone do repo (issue #8).
+# Só as dependências de produção entram. Sem npm e sem garmin/node_modules, o app
+# compila mesmo assim e, com o Garmin ligado, mostra que falta o ajudante.
+echo "==> Copiando o ajudante do Garmin"
+HELPER_DIR="$APP_DIR/Contents/Resources/garmin"
+if [ ! -d garmin/node_modules ] && command -v npm >/dev/null; then
+  (cd garmin && npm ci --omit=dev --no-audit --no-fund)
+fi
+if [ -d garmin/node_modules ]; then
+  mkdir -p "$HELPER_DIR"
+  cp garmin/gota-garmin.mjs garmin/package.json garmin/package-lock.json "$HELPER_DIR/"
+  ditto garmin/node_modules "$HELPER_DIR/node_modules"
+  if command -v npm >/dev/null; then
+    (cd "$HELPER_DIR" && npm prune --omit=dev --no-audit --no-fund >/dev/null)
+  fi
+  rm -rf "$HELPER_DIR/node_modules/.bin" "$HELPER_DIR/node_modules/.package-lock.json"
+else
+  echo "==> AVISO: sem garmin/node_modules nem npm; o .app vai sem o ajudante do Garmin" >&2
+fi
+
 echo "==> Assinando (ad-hoc)"
 codesign --force --sign - "$APP_DIR"
 

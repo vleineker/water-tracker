@@ -23,6 +23,7 @@ struct PanelView: View {
     @Bindable private var loginState = LoginItemUIState.shared
     @Bindable private var uiState = PanelUIState.shared
     @Bindable private var updater = UpdateChecker.shared
+    @Bindable private var garmin = GarminSyncer.shared
 
     private var goalMet: Bool { store.log.metGoalToday }
 
@@ -53,6 +54,9 @@ struct PanelView: View {
                 settings
                 Divider()
             }
+            if store.settings.garminEnabled, let problem = garmin.problem {
+                garminRow(problem)
+            }
             if let release = updater.available {
                 updateRow(release)
             }
@@ -67,6 +71,7 @@ struct PanelView: View {
             NotificationManager.shared.refreshStatus()
             updater.checkIfDue()
             HydrationStore.shared.importPhoneInbox()
+            GarminSyncer.shared.sync(.panelOpened)
         }
         .onDisappear {
             uiState.settingsExpanded = false
@@ -205,6 +210,16 @@ struct PanelView: View {
         )
     }
 
+    private var garminToggleBinding: Binding<Bool> {
+        Binding(
+            get: { store.settings.garminEnabled },
+            set: { newValue in
+                if !newValue { GarminSyncer.shared.reset() }
+                store.binding(\.garminEnabled).wrappedValue = newValue
+            }
+        )
+    }
+
     private var settings: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Ajustes")
@@ -243,6 +258,11 @@ struct PanelView: View {
                 .toggleStyle(.switch)
                 .controlSize(.small)
                 .frame(height: 20)
+            Toggle("Garmin", isOn: garminToggleBinding)
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .frame(height: 20)
+                .help("Envia cada garrafa ao Garmin Connect e lê de lá o total de hoje")
             if loginState.needsApproval {
                 Button("Aprovar nos Ajustes") {
                     LoginItemManager.openSettings()
@@ -290,6 +310,38 @@ struct PanelView: View {
             .font(.caption)
         }
         .buttonStyle(.borderless)
+    }
+
+    // MARK: - Garmin (só com o interruptor ligado e depois de um erro)
+
+    private func garminRow(_ problem: GarminProblem) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Image(systemName: "exclamationmark.arrow.triangle.2.circlepath")
+                    .foregroundStyle(.secondary)
+                Text(garminLine(problem)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if problem == .sessionMissing {
+                Text(GarminHelper.loginCommand)
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Copiar comando") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(GarminHelper.loginCommand, forType: .string)
+                }
+                .buttonStyle(.link)
+            }
+        }
+        .font(.caption)
+    }
+
+    private func garminLine(_ problem: GarminProblem) -> String {
+        let pending = store.garminQueue.count
+        guard pending > 0 else { return problem.message }
+        return problem.message + (pending == 1 ? " 1 registro na fila." : " \(pending) registros na fila.")
     }
 
     // MARK: - [6] Rodapé
