@@ -3,15 +3,6 @@ import Observation
 import AppKit
 import SwiftUI
 
-struct Settings: Codable, Equatable {
-    var bottleML: Int = 500
-    var goalBottles: Int = 4
-    var intervalMin: Int = 60
-    var startHour: Int = 8
-    var endHour: Int = 22
-    var showCountInBar: Bool = true
-}
-
 private struct Persisted: Codable {
     var settings: Settings = Settings()
     var history: [String: Int] = [:]
@@ -37,37 +28,41 @@ private struct Persisted: Codable {
     }
 }
 
-/// Um dia na faixa de streak (D-6 … hoje) — ver regra do streak no handoff de design.
-struct StreakDay: Identifiable {
-    let id: String
-    let met: Bool
-    let isToday: Bool
-}
-
+/// Só guarda e observa: lê/grava o estado em `gota.state.v1` e acompanha a troca
+/// de dia. Toda regra (meta batida, progresso, streak, validação) mora em `HydrationLog`.
 @MainActor
 @Observable
 final class HydrationStore {
     static let shared = HydrationStore()
 
     private static let defaultsKey = "gota.state.v1"
-    private static let dayFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        f.timeZone = .current
-        return f
-    }()
+
+    /// Chamado depois de cada mudança feita pelo usuário (garrafa somada/removida ou
+    /// ajuste alterado). O `AppDelegate` liga isto ao agendador de lembretes.
+    @ObservationIgnored var onChange: (() -> Void)?
 
     private(set) var settings: Settings
+    /// Garrafas por dia (formato v1). O núcleo recebe isso convertido para ml.
     private(set) var history: [String: Int]
     private(set) var metGoal: [String: Bool]
-    private(set) var todayKey: String
+    /// Início do dia corrente. Guardado (e não lido do relógio a cada acesso) para a
+    /// troca de dia disparar a atualização da interface.
+    private(set) var today: Date
+
+    /// Calendário fixo gregoriano para as chaves `yyyy-MM-dd` não mudarem com o
+    /// calendário escolhido no sistema.
+    private static let calendar: Calendar = {
+        var c = Calendar(identifier: .gregorian)
+        c.timeZone = .current
+        return c
+    }()
 
     private init() {
         let loaded = HydrationStore.load()
         self.settings = loaded.settings
         self.history = loaded.history
         self.metGoal = loaded.metGoal
-        self.todayKey = HydrationStore.dayFormatter.string(from: Date())
+        self.today = Self.calendar.startOfDay(for: Date())
 
         NotificationCenter.default.addObserver(
             forName: .NSCalendarDayChanged, object: nil, queue: .main
@@ -81,34 +76,44 @@ final class HydrationStore {
         }
     }
 
-    var todayCount: Int {
-        history[todayKey] ?? 0
+    /// Retrato do estado atual para o núcleo de regras.
+    var log: HydrationLog {
+        HydrationLog(
+            settings: settings,
+            mlByDay: history.mapValues { $0 * settings.bottleML },
+            metGoalByDay: metGoal,
+            now: today,
+            calendar: Self.calendar
+        )
+    }
+
+    private var todayKey: String {
+        HydrationLog.dayKey(for: today, calendar: Self.calendar)
     }
 
     func refreshDay() {
-        let key = HydrationStore.dayFormatter.string(from: Date())
-        if key != todayKey {
-            todayKey = key
+        let start = Self.calendar.startOfDay(for: Date())
+        if start != today {
+            today = start
         }
     }
 
     func add(_ delta: Int) {
         refreshDay()
-        let current = history[todayKey] ?? 0
-        let updated = max(0, current + delta)
-        history[todayKey] = updated
-        // Vale o último valor do dia, não "em algum momento" — um "−1" depois de
-        // bater a meta desfaz o dia batido (regra do streak, handoff seção 4).
-        metGoal[todayKey] = updated >= settings.goalBottles
+        history[todayKey] = max(0, (history[todayKey] ?? 0) + delta)
+        recordTodayGoal()
         trimHistory()
         persist()
-        ReminderScheduler.shared.didLogDrink()
+        onChange?()
     }
 
     func updateSettings(_ newSettings: Settings) {
-        settings = newSettings
+        settings = HydrationLog.validated(newSettings, from: settings)
+        refreshDay()
+        // Meta nova vale para hoje na hora, sem esperar a próxima garrafa.
+        recordTodayGoal()
         persist()
-        ReminderScheduler.shared.recompute()
+        onChange?()
     }
 
     /// Binding genérico para um campo de Settings — usado pelos Steppers/Toggles do painel.
@@ -123,33 +128,10 @@ final class HydrationStore {
         )
     }
 
-    /// Últimos 7 dias (D-6 … hoje) para a faixa de pontos do streak.
-    func last7StreakDays() -> [StreakDay] {
-        let calendar = Calendar.current
-        var result: [StreakDay] = []
-        for offset in stride(from: 6, through: 0, by: -1) {
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: Date()) else { continue }
-            let key = HydrationStore.dayFormatter.string(from: date)
-            result.append(StreakDay(id: key, met: metGoal[key] ?? false, isToday: offset == 0))
-        }
-        return result
-    }
-
-    /// Dias consecutivos terminando ontem ou hoje com meta batida (handoff seção 4).
-    var streak: Int {
-        let calendar = Calendar.current
-        var count = 0
-        if var cursor = calendar.date(byAdding: .day, value: -1, to: Date()) {
-            while metGoal[HydrationStore.dayFormatter.string(from: cursor)] == true {
-                count += 1
-                guard let prev = calendar.date(byAdding: .day, value: -1, to: cursor) else { break }
-                cursor = prev
-            }
-        }
-        if metGoal[todayKey] == true {
-            count += 1
-        }
-        return count
+    /// Grava o resultado de hoje para que, virado o dia, ele fique congelado no streak.
+    private func recordTodayGoal() {
+        guard history[todayKey] != nil else { return }
+        metGoal[todayKey] = log.metGoalToday
     }
 
     private func trimHistory() {

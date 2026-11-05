@@ -14,13 +14,16 @@ echo "==> Limpando build anterior"
 rm -rf "$BUILD_DIR"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 
+# Testes do núcleo primeiro: se algum falhar, o set -e para o build aqui.
+./test.sh
+
 compile_arch() {
   local target="$1"
   local output="$2"
   swiftc -parse-as-library -swift-version 5 -O -whole-module-optimization \
     -target "$target" -sdk "$SDK_PATH" \
     -framework SwiftUI -framework AppKit -framework UserNotifications -framework ServiceManagement \
-    Sources/*.swift -o "$output"
+    Sources/*.swift Sources/Core/*.swift -o "$output"
 }
 
 echo "==> Compilando (arm64)"

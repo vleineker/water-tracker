@@ -17,43 +17,34 @@ struct GotaApp: App {
 
     @ViewBuilder
     private var menuBarLabel: some View {
-        let count = store.todayCount
-        let goal = store.settings.goalBottles
+        let log = store.log
         if store.settings.showCountInBar {
             HStack(spacing: 4) {
-                dropImage(count: count, goal: goal)
-                Text("\(count)/\(goal)")
+                dropImage(log)
+                Text("\(log.todayBottles)/\(log.settings.goalBottles)")
             }
         } else {
-            dropImage(count: count, goal: goal)
+            dropImage(log)
         }
     }
 
     @ViewBuilder
-    private func dropImage(count: Int, goal: Int) -> some View {
-        let name = dropAssetName(count: count, goal: goal)
-        if let nsImage = Self.menubarImage(named: name) {
+    private func dropImage(_ log: HydrationLog) -> some View {
+        if let nsImage = Self.menubarImage(named: dropAssetName(log)) {
             Image(nsImage: nsImage)
         } else {
-            Image(systemName: dropSymbolFallback(count: count, goal: goal))
+            Image(systemName: log.metGoalToday ? "drop.fill" : "drop")
         }
     }
 
-    private func dropAssetName(count: Int, goal: Int) -> String {
-        if goal > 0 && count >= goal {
+    private func dropAssetName(_ log: HydrationLog) -> String {
+        if log.metGoalToday {
             return "drop-full"
         }
-        if count > 0 {
+        if log.todayBottles > 0 {
             return "drop-half"
         }
         return "drop-empty"
-    }
-
-    private func dropSymbolFallback(count: Int, goal: Int) -> String {
-        if goal > 0 && count >= goal {
-            return "drop.fill"
-        }
-        return "drop"
     }
 
     private static var menubarImageCache: [String: NSImage] = [:]
@@ -82,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         NotificationManager.shared.configure()
+        HydrationStore.shared.onChange = { ReminderScheduler.shared.recompute() }
         ReminderScheduler.shared.start()
         LoginItemManager.registerDefaultIfFirstLaunch()
     }
