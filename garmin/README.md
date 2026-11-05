@@ -106,5 +106,13 @@ prontas de hidratação dela, por três motivos:
 4. `node gota-garmin.mjs add 50 $(date +%FT%T)` e conferir que `total_ml` subiu
    50 e que a entrada aparece no app e no relógio.
 5. Desfazer com `node gota-garmin.mjs add -50 $(date +%FT%T)` e confirmar com
-   `get` que o total voltou. Se o Garmin recusar o valor negativo, apagar a
-   entrada pela tela de hidratação do app Garmin Connect.
+   `get` que o total voltou.
+
+Validado com a conta real em 2026-11-05: login, leitura, gravação de 50 ml no
+horário local certo e correção de -50 ml, que levou o dia de volta a 0 ml. O
+Garmin não pediu código de duas etapas nesse login, então esse caminho segue
+sem teste real. O login principal da biblioteca recebeu 429 e o login alternativo
+dela (o formulário web) completou a entrada.
+
+Quando o total chega a 0, o Garmin devolve
+`valueInML: null`, e o ajudante responde `total_ml: 0`.

@@ -221,10 +221,11 @@ async function cmdAdd(mlArg, timeArg) {
       valueInML: ml,
       userProfileId: profile.profileId,
     });
-    if (!isObject(res) || typeof res.valueInML !== 'number') {
+    // valueInML comes back null when the day's total drops to 0 (e.g. after a correction).
+    if (!isObject(res) || !('valueInML' in res) || (res.valueInML !== null && typeof res.valueInML !== 'number')) {
       throw new HelperError('garmin_changed', 'Resposta da gravação em formato inesperado.', JSON.stringify(res)?.slice(0, 300));
     }
-    return { ok: true, date, added_ml: ml, timestamp_local: timestampLocal, total_ml: Math.round(res.valueInML) };
+    return { ok: true, date, added_ml: ml, timestamp_local: timestampLocal, total_ml: Math.round(res.valueInML ?? 0) };
   });
 }
 

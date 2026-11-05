@@ -192,3 +192,12 @@ test('a refreshed session is saved back with permission 600 in a 700 folder', as
   }
   assert.equal(fs.statSync(dir).mode & 0o777, 0o700);
 });
+
+test('a correction that empties the day reports total 0 (Garmin sends valueInML null)', async () => {
+  const g = await fakeGarmin((url) =>
+    url.includes('userprofile') ? [200, { profileId: 42 }] : [200, { calendarDate: '2026-11-05', valueInML: null }]
+  );
+  const r = await run(['add', '-50', '2026-11-05T14:50:00'], { env: { ...g.env, GOTA_GARMIN_TOKEN_DIR: tempTokenDir(true) } });
+  g.close();
+  assert.deepEqual(r.json, { ok: true, date: '2026-11-05', added_ml: -50, timestamp_local: '2026-11-05T14:50:00.000', total_ml: 0 });
+});
