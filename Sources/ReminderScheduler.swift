@@ -29,10 +29,6 @@ final class ReminderScheduler {
         nextReminderAt = Self.next(after: Date(), settings: settings, intervalOverrideSeconds: debugIntervalOverride)
     }
 
-    func didLogDrink() {
-        recompute()
-    }
-
     func snooze(minutes: Int) {
         nextReminderAt = Date().addingTimeInterval(TimeInterval(minutes * 60))
     }
@@ -50,11 +46,10 @@ final class ReminderScheduler {
         }
         guard Date() >= next else { return }
 
-        let settings = HydrationStore.shared.settings
-        let count = HydrationStore.shared.todayCount
+        let log = HydrationStore.shared.log
         let hour = Calendar.current.component(.hour, from: Date())
-        let withinWindow = hour >= settings.startHour && hour < settings.endHour
-        if withinWindow && count < settings.goalBottles {
+        let withinWindow = hour >= log.settings.startHour && hour < log.settings.endHour
+        if withinWindow && !log.metGoalToday {
             NotificationManager.shared.postReminder()
         }
         recompute()

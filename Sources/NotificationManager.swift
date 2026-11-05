@@ -60,8 +60,9 @@ final class NotificationManager: NSObject {
     }
 
     func postReminder() {
-        let count = HydrationStore.shared.todayCount
-        let goal = HydrationStore.shared.settings.goalBottles
+        let log = HydrationStore.shared.log
+        let count = log.todayBottles
+        let goal = log.settings.goalBottles
         let title = "Hora de beber água"
         let body = "Você bebeu \(count) de \(goal) garrafas hoje."
 

@@ -74,6 +74,20 @@ final — a cópia instalada é a única fonte de verdade.
 Rebuildar após qualquer mudança em `Sources/` ou
 `Resources/Info.plist`: basta rodar `./build.sh` de novo.
 
+### Testes
+
+```bash
+./test.sh
+```
+
+Testa as regras de hidratação (`Sources/Core/HydrationLog.swift`: progresso,
+meta batida, streak, últimos 7 dias, validação de início/fim) com
+swift-testing. O `swift test` não funciona com o Command Line Tools desta
+máquina (o SwiftPM não consegue ler nenhum `Package.swift`), então o
+`test.sh` compila os testes direto com `swiftc` num executável em
+`build/GotaTests`. O `build.sh` roda os testes antes de compilar o app e para
+se algum falhar.
+
 ### Rebuild automático (opcional, local)
 
 ```bash

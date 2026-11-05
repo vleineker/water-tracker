@@ -24,27 +24,22 @@ struct PanelView: View {
     @Bindable private var uiState = PanelUIState.shared
     @Bindable private var updater = UpdateChecker.shared
 
-    private var goalMet: Bool {
-        store.todayCount >= store.settings.goalBottles
-    }
+    private var goalMet: Bool { store.log.metGoalToday }
 
-    private var progress: Double {
-        guard store.settings.goalBottles > 0 else { return 0 }
-        return min(1.0, Double(store.todayCount) / Double(store.settings.goalBottles))
-    }
+    private var progress: Double { store.log.progress }
+
+    private var todayBottles: Int { store.log.todayBottles }
 
     private var litersLabel: String {
-        let drankL = Double(store.todayCount * store.settings.bottleML) / 1000.0
-        let goalL = Double(store.settings.goalBottles * store.settings.bottleML) / 1000.0
+        let log = store.log
+        let drankL = Double(log.todayML) / 1000.0
+        let goalL = Double(log.goalML) / 1000.0
         return String(format: "%.1f L de %.1f L", drankL, goalL).replacingOccurrences(of: ".", with: ",")
     }
 
     private var streakLabel: String {
-        switch store.streak {
-        case 0: return "0 dias"
-        case 1: return "1 dia"
-        default: return "\(store.streak) dias"
-        }
+        let streak = store.log.streak
+        return streak == 1 ? "1 dia" : "\(streak) dias"
     }
 
     var body: some View {
@@ -102,7 +97,7 @@ struct PanelView: View {
     }
 
     private var countText: some View {
-        (Text("\(store.todayCount)").fontWeight(.semibold).foregroundStyle(.primary)
+        (Text("\(todayBottles)").fontWeight(.semibold).foregroundStyle(.primary)
          + Text(" de \(store.settings.goalBottles) garrafas").foregroundStyle(.secondary))
             .font(.body)
     }
@@ -118,7 +113,7 @@ struct PanelView: View {
             }
         }
         .frame(height: 4)
-        .animation(.easeOut(duration: 0.2), value: store.todayCount)
+        .animation(.easeOut(duration: 0.2), value: todayBottles)
     }
 
     // MARK: - [3] Litros · Streak
@@ -128,15 +123,15 @@ struct PanelView: View {
             Text(litersLabel).font(.caption).foregroundStyle(.secondary)
             Spacer()
             HStack(spacing: 3) {
-                ForEach(store.last7StreakDays()) { day in
+                ForEach(store.log.last7Days) { day in
                     streakDot(day)
                 }
             }
             Text(streakLabel).font(.caption).foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(store.streak) dias seguidos com meta batida")
-        .animation(.easeOut(duration: 0.2), value: store.todayCount)
+        .accessibilityLabel("\(store.log.streak) dias seguidos com meta batida")
+        .animation(.easeOut(duration: 0.2), value: todayBottles)
     }
 
     @ViewBuilder
@@ -169,7 +164,7 @@ struct PanelView: View {
                 }
                 .controlSize(.regular)
                 Spacer()
-                if store.todayCount > 0 {
+                if todayBottles > 0 {
                     Button("−1") { uiState.confirmingRemove = true }
                         .buttonStyle(.borderless)
                         .foregroundStyle(.secondary)
@@ -202,28 +197,6 @@ struct PanelView: View {
 
     // MARK: - [6] Ajustes (expandido)
 
-    private var startHourBinding: Binding<Int> {
-        Binding(
-            get: { store.settings.startHour },
-            set: { newValue in
-                var s = store.settings
-                s.startHour = max(0, min(newValue, s.endHour - 1))
-                store.updateSettings(s)
-            }
-        )
-    }
-
-    private var endHourBinding: Binding<Int> {
-        Binding(
-            get: { store.settings.endHour },
-            set: { newValue in
-                var s = store.settings
-                s.endHour = min(23, max(newValue, s.startHour + 1))
-                store.updateSettings(s)
-            }
-        )
-    }
-
     private var loginToggleBinding: Binding<Bool> {
         Binding(
             get: { loginState.enabled },
@@ -255,12 +228,12 @@ struct PanelView: View {
                     .controlSize(.small)
             }
             settingsRow("Início", value: String(format: "%02d:00", store.settings.startHour)) {
-                Stepper("", value: startHourBinding, in: 0...23)
+                Stepper("", value: store.binding(\.startHour), in: 0...23)
                     .labelsHidden()
                     .controlSize(.small)
             }
             settingsRow("Fim", value: String(format: "%02d:00", store.settings.endHour)) {
-                Stepper("", value: endHourBinding, in: 0...23)
+                Stepper("", value: store.binding(\.endHour), in: 0...23)
                     .labelsHidden()
                     .controlSize(.small)
             }
