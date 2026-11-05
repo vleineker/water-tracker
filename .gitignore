@@ -2,3 +2,7 @@ build/
 build-assets/
 dist/
 .DS_Store
+garmin/node_modules/
+# Garmin session tokens live in ~/Library/Application Support/Gota/garmin/; never commit a copy.
+oauth1_token.json
+oauth2_token.json

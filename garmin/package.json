@@ -1,0 +1,19 @@
+{
+  "name": "gota-garmin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gota helper: read and write hydration on Garmin Connect via JSON CLI.",
+  "type": "module",
+  "bin": {
+    "gota-garmin": "./gota-garmin.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@flow-js/garmin-connect": "1.6.25"
+  },
+  "scripts": {
+    "test": "node --test test.mjs"
+  }
+}
