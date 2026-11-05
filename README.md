@@ -1,26 +1,49 @@
 # Gota
 
-Lembrete e tracker de água na barra de menus do macOS. App nativo em
-Swift/SwiftUI (`MenuBarExtra`), sem Dock, sem dependências externas —
-compilado direto com `swiftc` (sem Xcode).
+Lembrete e tracker de água na barra de menus do macOS. Registre cada
+garrafa pelo Mac, por um Atalho do iPhone ou, se quiser, pelo relógio
+Garmin, e tudo cai no mesmo dia.
+
+App nativo em Swift/SwiftUI (`MenuBarExtra`), sem Dock, para macOS 14
+ou superior. O app em Swift não tem dependências e compila direto com
+`swiftc`, sem Xcode. Só o Garmin, que é opcional, usa um ajudante em
+Node.
 
 ## Uso
 
-- Ícone na barra mostra o estágio da gota (`drop` / `drop.halffull` /
-  `drop.fill`) e, opcionalmente, "n/meta".
-- Clique no ícone abre o painel: anel de progresso, botões "+1
-  garrafa" / "−1", status do próximo lembrete, faixa dos últimos 7
-  dias e "Ajustes" (garrafa, meta, intervalo, janela ativa, login
-  item, exibir contagem na barra, "Testar lembrete").
+- A gota na barra de menus enche de baixo para cima conforme o dia
+  avança rumo à meta. Ela segue o tema do macOS (preta no claro,
+  branca no escuro).
+- Clique na gota para abrir o painel: quantas garrafas foram hoje,
+  botões "+1 garrafa" e "−1" (pede confirmação antes de remover), a
+  sequência de dias com meta batida, os últimos 7 dias e os
+  **Ajustes**: tamanho da garrafa, meta, espaço mínimo entre
+  lembretes, início e fim do dia, "Abrir ao iniciar sessão", Garmin e
+  "Testar lembrete".
+- Quando sai uma versão nova no GitHub, o painel mostra "Nova versão
+  disponível".
 - "Sair" (⌘Q) no rodapé do painel encerra o app.
+
+### Lembrete só quando atrasado
+
+O Gota não lembra de hora em hora. Ele divide a meta pelo dia ativo
+(entre o início e o fim dos Ajustes) e só avisa quando o que você
+bebeu fica atrás desse ritmo. Exemplo com meta de 4 garrafas das 8h
+às 22h: com nada bebido, o aviso vem às 8h; com 2 garrafas, só às
+15h. O "Espaço mínimo" é o tempo mínimo entre um aviso e o seguinte
+(ou entre a última garrafa e o próximo aviso). Fora do dia ativo, ou
+com a meta batida, nada toca. O aviso é agendado no próprio macOS,
+então chega mesmo com o Mac dormindo e acordando.
 
 ### Notificações
 
-Na primeira execução, o macOS pede permissão — clique em "Permitir"
+Na primeira execução, o macOS pede permissão: clique em "Permitir"
 para receber os lembretes. Recomendado: em **Ajustes do Sistema >
 Notificações > Gota**, trocar o estilo de **Banners** para
-**Alertas** — no estilo Banners, as ações ("Bebi uma garrafa" /
-"Lembrar em 15 min") ficam escondidas sob "Opções".
+**Alertas**. No estilo Banners, as ações ("Bebi uma garrafa" e
+"Lembrar em 15 min") ficam escondidas sob "Opções". Com as
+notificações negadas, o painel mostra um sino cortado ao lado do
+nome.
 
 ### Registrar pelo iPhone (Atalho)
 
@@ -59,6 +82,37 @@ iCloud já sincronizado) e veja a garrafa somada; o arquivo some da
 pasta. O macOS pode pedir permissão para o Gota acessar o iCloud
 Drive na primeira leitura. Se a permissão for negada, o app segue
 funcionando, só sem as garrafas do iPhone.
+
+### Garmin (opcional)
+
+Desligado de fábrica. Ligado o interruptor **Garmin** nos Ajustes,
+cada garrafa do Mac ou do iPhone vai para o Garmin Connect, e o total
+de hoje passa a ser o do Garmin. Assim, o que você registra no
+relógio também entra no dia do Gota. Sem internet, as garrafas ficam
+numa fila e vão quando a conexão voltar.
+
+Precisa de:
+
+- **Node 20 ou mais novo**, instalado pelo Homebrew (`brew install
+  node`). O app procura em `/opt/homebrew/bin/node` e
+  `/usr/local/bin/node`.
+- **Login no Garmin, uma vez, pelo Terminal.** Com o interruptor
+  ligado e sem sessão, o painel mostra o comando e um botão "Copiar
+  comando". Cole no Terminal e digite e-mail, senha e, se pedir, o
+  código de duas etapas. A senha não é gravada; só a sessão fica em
+  `~/Library/Application Support/Gota/garmin/`. Para sair, apague essa
+  pasta.
+
+No relógio, o resumo de hidratação depende do modelo. No Forerunner
+265 ele vem do app gratuito **Hydration**, da loja Connect IQ,
+instalado à parte pelo app Connect IQ do celular. É nele
+que aparecem as garrafas vindas do Gota e que se registra água pelo
+relógio.
+
+A Garmin não tem API oficial para água. O ajudante usa um cliente
+não oficial e pode quebrar quando a Garmin mudar algo; nesse caso o
+painel avisa, e o resto do app segue funcionando. Detalhes do
+ajudante em [`garmin/README.md`](garmin/README.md).
 
 ## Instalar
 
@@ -118,13 +172,14 @@ Rebuildar após qualquer mudança em `Sources/` ou
 ./test.sh
 ```
 
-Testa as regras de hidratação (`Sources/Core/HydrationLog.swift`: progresso,
-meta batida, streak, últimos 7 dias, validação de início/fim) com
-swift-testing. O `swift test` não funciona com o Command Line Tools desta
-máquina (o SwiftPM não consegue ler nenhum `Package.swift`), então o
-`test.sh` compila os testes direto com `swiftc` num executável em
-`build/GotaTests`. O `build.sh` roda os testes antes de compilar o app e para
-se algum falhar.
+Testa as regras puras de `Sources/Core/` (progresso e meta, ritmo do
+lembrete, gota da barra, Atalho do iPhone, fila do Garmin, estado
+salvo, login item) com swift-testing. O `swift test` não funciona com
+o Command Line Tools sem Xcode (o SwiftPM não consegue ler o
+`Package.swift`), então o `test.sh` compila os testes direto com
+`swiftc` num executável em `build/GotaTests`. O `build.sh` roda os
+testes antes de compilar o app e para se algum falhar. O ajudante do
+Garmin tem testes próprios: `cd garmin && npm test`.
 
 ### Rebuild automático (opcional, local)
 
@@ -147,33 +202,46 @@ Desregistra o login item, remove o LaunchAgent de fallback (se
 existir), mata o processo, remove `~/Applications/Gota.app` e limpa
 as preferências (`defaults delete com.vleineker.gota`).
 
-## Debug do lembrete (sem esperar o intervalo real)
+## Debug do lembrete
 
-Por padrão o intervalo de lembrete é configurável nos Ajustes (15–240
-min). Para testar o scheduler sem esperar:
+"Testar lembrete", nos Ajustes, mostra um aviso na hora. Para ver o
+ritmo funcionando sem esperar o "Espaço mínimo" real:
 
 ```bash
-pkill -x Gota
 defaults write com.vleineker.gota gota.debugIntervalSeconds 60
-open ~/Applications/Gota.app
-# espera ~90s (heartbeat de 30s + tolerância) e observa o lembrete
+```
+
+O valor, em segundos, substitui o "Espaço mínimo" no cálculo do
+próximo lembrete; o dia ativo (início e fim) continua valendo e o
+aviso só toca com o dia atrasado. Reabra o app para valer. Para
+voltar ao normal:
+
+```bash
 defaults delete com.vleineker.gota gota.debugIntervalSeconds
 ```
 
-O override é lido em segundos e substitui o intervalo configurado
-(`intervalMin`) só para o cálculo do próximo lembrete — a janela
-ativa (início/fim) continua valendo.
-
 ## Dados
 
-Estado (ajustes + histórico diário) persiste em `UserDefaults` sob a
-chave `gota.state.v1` (`defaults read com.vleineker.gota
-gota.state.v1`). Histórico é aparado para os últimos 30 dias.
+Ajustes e histórico ficam em `UserDefaults`, na chave
+`gota.state.v2`, em ml por dia (`defaults read com.vleineker.gota
+gota.state.v2`). O histórico guarda os últimos 30 dias. Quem vinha da
+versão 1.1 tem o formato antigo (`gota.state.v1`, garrafas por dia)
+convertido uma vez, na primeira abertura.
 
 ## Login item
 
 Ligado por padrão na primeira execução (`SMAppService.mainApp`,
-guardado por `gota.didRegisterLoginItem` — não religa automaticamente
-se desligado depois). Pode exigir aprovação em **Ajustes > Geral >
-Itens de Início** — o painel mostra um botão "Aprovar nos Ajustes"
-quando necessário.
+guardado por `gota.didRegisterLoginItem`, então não religa sozinho se
+você desligar depois). Pode exigir aprovação em **Ajustes do Sistema
+> Geral > Itens de Início**; o painel mostra um botão "Aprovar nos
+Ajustes" quando necessário.
+
+Se o registro pelo sistema falhar, o Gota grava um LaunchAgent de
+reserva em `~/Library/LaunchAgents/com.vleineker.gota.plist`.
+Desligar "Abrir ao iniciar sessão" apaga esse arquivo, se ele
+existir.
+
+## Contribuir e licença
+
+Como compilar, testar e mandar mudanças: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Código sob a licença MIT ([`LICENSE`](LICENSE)).
