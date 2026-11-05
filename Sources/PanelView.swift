@@ -253,10 +253,6 @@ struct PanelView: View {
                     .font(.caption2)
                     .foregroundStyle(.red)
             }
-            Toggle("Mostrar contagem na barra", isOn: store.binding(\.showCountInBar))
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .frame(height: 20)
 
             Spacer().frame(height: 2)
 
