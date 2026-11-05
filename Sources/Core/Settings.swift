@@ -2,13 +2,13 @@ import Foundation
 
 /// Ajustes do usuário. Os nomes dos campos fazem parte do formato salvo
 /// (`gota.state.v1` e `gota.state.v2`) — renomear quebra o decode do que já está gravado.
+/// Campo removido (como `showCountInBar`) é só ignorado no decode.
 struct Settings: Codable, Equatable {
     var bottleML: Int = 500
     var goalBottles: Int = 4
     var intervalMin: Int = 60
     var startHour: Int = 8
     var endHour: Int = 22
-    var showCountInBar: Bool = true
 }
 
 // Decode tolerante campo a campo: campo ausente (ex.: um ajuste novo que o dado
@@ -17,7 +17,7 @@ struct Settings: Codable, Equatable {
 // init memberwise.
 extension Settings {
     private enum CodingKeys: String, CodingKey {
-        case bottleML, goalBottles, intervalMin, startHour, endHour, showCountInBar
+        case bottleML, goalBottles, intervalMin, startHour, endHour
     }
 
     init(from decoder: Decoder) throws {
@@ -28,6 +28,5 @@ extension Settings {
         intervalMin = (try? c.decodeIfPresent(Int.self, forKey: .intervalMin)) ?? d.intervalMin
         startHour = (try? c.decodeIfPresent(Int.self, forKey: .startHour)) ?? d.startHour
         endHour = (try? c.decodeIfPresent(Int.self, forKey: .endHour)) ?? d.endHour
-        showCountInBar = (try? c.decodeIfPresent(Bool.self, forKey: .showCountInBar)) ?? d.showCountInBar
     }
 }

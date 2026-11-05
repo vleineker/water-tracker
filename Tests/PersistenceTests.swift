@@ -22,7 +22,7 @@ struct MigrationTests {
         #expect(state.mlByDay == ["2026-10-14": 750, "2026-10-19": 2250])
         #expect(state.metGoal.isEmpty)
         #expect(state.settings == Settings(
-            bottleML: 750, goalBottles: 3, intervalMin: 45, startHour: 9, endHour: 21, showCountInBar: false
+            bottleML: 750, goalBottles: 3, intervalMin: 45, startHour: 9, endHour: 21
         ))
     }
 
