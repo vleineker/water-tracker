@@ -87,7 +87,14 @@ struct Water: Shape {
 struct TankView: View {
     let snapshot: WidgetSnapshot
 
+    /// Com outra janela em foco, o macOS esmaece os widgets do desktop: descarta o
+    /// fundo do cartão e reduz as cores a tons de claro. Por isso a água fica no
+    /// conteúdo (e não no fundo) e, nesse modo, usa branco translúcido no lugar do azul.
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
     private static let blue = Color(nsColor: .systemBlue)
+
+    private var faded: Bool { renderingMode != .fullColor }
 
     private var liters: String {
         (Double(snapshot.todayML) / 1000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: "pt_BR"))) + " L"
@@ -95,6 +102,11 @@ struct TankView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
+            Water(level: snapshot.progress, phase: .pi)
+                .fill(faded ? Color.white.opacity(0.12) : Self.blue.opacity(0.55))
+            Water(level: snapshot.progress, phase: 0)
+                .fill(faded ? Color.white.opacity(0.22) : Self.blue)
+
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(Int((snapshot.progress * 100).rounded()))%")
                     .font(.system(size: 38, weight: .semibold, design: .rounded))
@@ -108,22 +120,20 @@ struct TankView: View {
                     .foregroundStyle(.white)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(16)
 
             Button(intent: AddBottleIntent()) {
                 Image(systemName: "plus")
                     .font(.system(size: 17, weight: .bold))
-                    .foregroundStyle(Self.blue)
+                    .foregroundStyle(faded ? Color.white : Self.blue)
                     .frame(width: 36, height: 36)
-                    .background(.white, in: Circle())
+                    .background(faded ? Color.white.opacity(0.25) : Color.white, in: Circle())
             }
             .buttonStyle(.plain)
+            .padding(14)
         }
         .containerBackground(for: .widget) {
-            ZStack {
-                Color(red: 0.11, green: 0.11, blue: 0.12)
-                Water(level: snapshot.progress, phase: .pi).fill(Self.blue.opacity(0.55))
-                Water(level: snapshot.progress, phase: 0).fill(Self.blue)
-            }
+            Color(red: 0.11, green: 0.11, blue: 0.12)
         }
     }
 }
@@ -137,5 +147,6 @@ struct GotaWidget: Widget {
         .configurationDisplayName("Gota")
         .description("Quanto você já bebeu hoje, com um toque para registrar uma garrafa.")
         .supportedFamilies([.systemSmall])
+        .contentMarginsDisabled()
     }
 }
