@@ -243,6 +243,13 @@ final class HydrationStore {
             settings: settings, mlByDay: mlByDay, metGoal: metGoal,
             importedFiles: importedFiles, garminQueue: garminQueue, garminLastRead: garminLastRead
         ))
+        WidgetBridge.publish(widgetSnapshot)
+    }
+
+    /// O dia de hoje no formato que o widget de desktop lê.
+    var widgetSnapshot: WidgetSnapshot {
+        WidgetSnapshot(dayKey: todayKey, todayML: mlByDay[todayKey] ?? 0,
+                       bottleML: settings.bottleML, goalBottles: settings.goalBottles)
     }
 
     private static func write(_ state: PersistedState) {

@@ -45,6 +45,19 @@ Notificações > Gota**, trocar o estilo de **Banners** para
 notificações negadas, o painel mostra um sino cortado ao lado do
 nome.
 
+### Widget de desktop
+
+O Gota traz um widget para o desktop do macOS: o cartão é um tanque que
+enche conforme o dia avança rumo à meta, e o "+" registra uma garrafa
+sem abrir o painel. Para colocar: clique com o botão direito no
+desktop, **Editar Widgets**, procure **Gota** e arraste.
+
+O widget roda isolado do app, então os dois conversam por arquivos em
+`~/Library/Application Support/Gota/widget`: o app grava o total do
+dia, e cada toque no "+" deixa um arquivo que o app soma e apaga. Com o
+Gota fechado, o toque fica guardado e entra quando o app abrir no mesmo
+dia.
+
 ### Registrar pelo iPhone (Atalho)
 
 Longe do Mac, um Atalho do iPhone registra a garrafa gravando um arquivo

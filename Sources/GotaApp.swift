@@ -35,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         HydrationStore.shared.onGarminWork = { GarminSyncer.shared.sync($0) }
         HydrationStore.shared.startPhoneInbox()
         GarminSyncer.shared.start()
+        WidgetBridge.start()
         LoginItemManager.registerDefaultIfFirstLaunch()
     }
 }

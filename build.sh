@@ -22,7 +22,7 @@ compile_arch() {
   local output="$2"
   swiftc -parse-as-library -swift-version 5 -O -whole-module-optimization \
     -target "$target" -sdk "$SDK_PATH" \
-    -framework SwiftUI -framework AppKit -framework UserNotifications -framework ServiceManagement \
+    -framework SwiftUI -framework AppKit -framework UserNotifications -framework ServiceManagement -framework WidgetKit \
     Sources/*.swift Sources/Core/*.swift -o "$output"
 }
 
@@ -45,6 +45,26 @@ if [ "$X86_OK" -eq 1 ]; then
 else
   cp "$BUILD_DIR/$APP_NAME-arm64" "$APP_DIR/Contents/MacOS/$APP_NAME"
 fi
+
+# Widget de desktop: uma extensão dentro do .app, compilada à parte. O macOS exige
+# que ela rode em sandbox, por isso tem assinatura e permissões próprias.
+WIDGET_DIR="$APP_DIR/Contents/PlugIns/GotaWidget.appex"
+compile_widget() {
+  swiftc -parse-as-library -swift-version 5 -O -whole-module-optimization \
+    -target "$1" -sdk "$SDK_PATH" -application-extension \
+    -Xlinker -e -Xlinker _NSExtensionMain \
+    Widget/*.swift Sources/Core/WidgetSnapshot.swift -o "$2"
+}
+echo "==> Compilando o widget"
+mkdir -p "$WIDGET_DIR/Contents/MacOS"
+compile_widget "arm64-apple-macosx14.0" "$BUILD_DIR/GotaWidget-arm64"
+if [ "$X86_OK" -eq 1 ] && compile_widget "x86_64-apple-macosx14.0" "$BUILD_DIR/GotaWidget-x86_64"; then
+  lipo -create -output "$WIDGET_DIR/Contents/MacOS/GotaWidget" \
+    "$BUILD_DIR/GotaWidget-arm64" "$BUILD_DIR/GotaWidget-x86_64"
+else
+  cp "$BUILD_DIR/GotaWidget-arm64" "$WIDGET_DIR/Contents/MacOS/GotaWidget"
+fi
+cp Resources/Widget-Info.plist "$WIDGET_DIR/Contents/Info.plist"
 
 echo "==> Copiando Info.plist"
 cp Resources/Info.plist "$APP_DIR/Contents/Info.plist"
@@ -72,6 +92,7 @@ else
 fi
 
 echo "==> Assinando (ad-hoc)"
+codesign --force --sign - --entitlements Resources/Widget.entitlements "$WIDGET_DIR"
 codesign --force --sign - "$APP_DIR"
 
 echo "==> Encerrando instância em execução"
