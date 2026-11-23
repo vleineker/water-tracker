@@ -98,7 +98,11 @@ fi
 
 echo "==> Assinando (ad-hoc)"
 codesign --force --sign - --entitlements Resources/Widget.entitlements "$WIDGET_DIR"
-codesign --force --sign - "$APP_DIR"
+# Identidade fixa (-r): sem ela a assinatura ad-hoc identifica o app pelo hash do
+# código, que muda a cada build. O macOS guarda os lembretes agendados por essa
+# identidade, então o build novo não apagava os do anterior, que seguiam tocando
+# com a contagem de garrafas antiga.
+codesign --force --sign - -r="designated => identifier \"$BUNDLE_ID\"" "$APP_DIR"
 
 echo "==> Encerrando instância em execução"
 pkill -x "$APP_NAME" || true
