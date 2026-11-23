@@ -51,7 +51,7 @@ fi
 WIDGET_DIR="$APP_DIR/Contents/PlugIns/GotaWidget.appex"
 compile_widget() {
   swiftc -parse-as-library -swift-version 5 -O -whole-module-optimization \
-    -target "$1" -sdk "$SDK_PATH" -application-extension \
+    -target "$1" -sdk "$SDK_PATH" -application-extension -module-name GotaWidget \
     -Xlinker -e -Xlinker _NSExtensionMain \
     Widget/*.swift Sources/Core/WidgetSnapshot.swift -o "$2"
 }
@@ -65,6 +65,11 @@ else
   cp "$BUILD_DIR/GotaWidget-arm64" "$WIDGET_DIR/Contents/MacOS/GotaWidget"
 fi
 cp Resources/Widget-Info.plist "$WIDGET_DIR/Contents/Info.plist"
+# O macOS só executa o "+" se a extensão trouxer a ficha do AddBottleIntent. O Xcode
+# gera essa ficha sozinho; aqui (só swiftc) ela é escrita à mão e precisa bater com o
+# nome do módulo (-module-name acima) e do intent em Widget/GotaWidget.swift.
+mkdir -p "$WIDGET_DIR/Contents/Resources"
+cp -R Resources/Widget-Metadata.appintents "$WIDGET_DIR/Contents/Resources/Metadata.appintents"
 
 echo "==> Copiando Info.plist"
 cp Resources/Info.plist "$APP_DIR/Contents/Info.plist"
