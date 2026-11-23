@@ -1,0 +1,55 @@
+{
+  "actions" : {
+    "AddBottleIntent" : {
+      "assistantDefinedSchemas" : [],
+      "assistantDefinedSchemaTraits" : [],
+      "authenticationPolicy" : 0,
+      "availabilityAnnotations" : {
+        "LNPlatformNameWildcard" : {
+          "introducedVersion" : "*"
+        }
+      },
+      "effectiveBundleIdentifiers" : [],
+      "fullyQualifiedTypeName" : "GotaWidget.AddBottleIntent",
+      "identifier" : "AddBottleIntent",
+      "isAuthPolExplicit" : false,
+      "isDiscoverable" : false,
+      "mangledTypeName" : "10GotaWidget15AddBottleIntentV",
+      "mangledTypeNameByBundleIdentifier" : {},
+      "mangledTypeNameByBundleIdentifierV2" : {},
+      "mangledTypeNameV2" : "10GotaWidget15AddBottleIntentV",
+      "openAppWhenRun" : false,
+      "outputFlags" : 0,
+      "parameters" : [],
+      "presentationStyle" : 0,
+      "requiredCapabilities" : [],
+      "supportedModes" : 1,
+      "systemProtocolMetadata" : [],
+      "systemProtocolMetadataV2" : [],
+      "systemProtocols" : [],
+      "title" : {
+        "alternatives" : [],
+        "key" : "Bebi uma garrafa"
+      },
+      "typeSpecificMetadata" : [],
+      "visibilityMetadata" : {
+        "assistantOnly" : false,
+        "isDiscoverable" : false
+      }
+    }
+  },
+  "assistantEntities" : [],
+  "assistantIntentNegativePhrases" : [],
+  "assistantIntents" : [],
+  "autoShortcuts" : [],
+  "entities" : {},
+  "enums" : [],
+  "generator" : {
+    "name" : "xcode-tools",
+    "version" : "27A225b"
+  },
+  "negativePhrases" : [],
+  "queries" : {},
+  "shortcutTileColor" : 14,
+  "version" : 1
+}
