@@ -18,7 +18,7 @@ else
 fi
 PLUGINS="$(dirname "$(xcrun -f swiftc)")/../lib/swift/host/plugins/testing"
 
-OUT="build/GotaTests"
+OUT="build/WaterTrackerTests"
 mkdir -p build
 
 echo "==> Compilando testes"

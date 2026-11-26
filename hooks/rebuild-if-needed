@@ -1,5 +1,5 @@
 #!/bin/bash
-# Rebuild local do Gota disparado pelos hooks post-commit/post-merge.
+# Rebuild local do Water Tracker disparado pelos hooks post-commit/post-merge.
 # Uso: hooks/rebuild-if-needed <rev-base>. Nunca falha a operação do git.
 
 BASE="$1"

@@ -78,11 +78,11 @@ final class ReminderScheduler {
                 trigger: Self.trigger(for: fireDate, now: now)
             )
             center.add(request) { error in
-                if let error { NSLog("Gota: falha ao agendar lembrete: \(error.localizedDescription)") }
+                if let error { NSLog("Water Tracker: falha ao agendar lembrete: \(error.localizedDescription)") }
             }
         }
         defaults.set(times.map(\.timeIntervalSince1970), forKey: Key.scheduled)
-        NSLog("Gota: \(times.count) lembrete(s) agendado(s); próximo: \(times.first.map { "\($0)" } ?? "nenhum")")
+        NSLog("Water Tracker: \(times.count) lembrete(s) agendado(s); próximo: \(times.first.map { "\($0)" } ?? "nenhum")")
     }
 
     /// "Lembrar em 15 min": vale no lugar do espaço mínimo, só se o dia seguir atrasado.

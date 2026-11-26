@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-APP_NAME="Gota"
+APP_NAME="Water Tracker"
 BUNDLE_ID="com.vleineker.gota"
 BUILD_DIR="build"
 APP_DIR="$BUILD_DIR/$APP_NAME.app"
@@ -48,26 +48,26 @@ fi
 
 # Widget de desktop: uma extensão dentro do .app, compilada à parte. O macOS exige
 # que ela rode em sandbox, por isso tem assinatura e permissões próprias.
-WIDGET_DIR="$APP_DIR/Contents/PlugIns/GotaWidget.appex"
+WIDGET_DIR="$APP_DIR/Contents/PlugIns/WaterTrackerWidget.appex"
 compile_widget() {
   swiftc -parse-as-library -swift-version 5 -O -whole-module-optimization \
-    -target "$1" -sdk "$SDK_PATH" -application-extension -module-name GotaWidget \
+    -target "$1" -sdk "$SDK_PATH" -application-extension -module-name WaterTrackerWidget \
     -Xlinker -e -Xlinker _NSExtensionMain \
     Widget/*.swift Sources/Core/WidgetSnapshot.swift -o "$2"
 }
 echo "==> Compilando o widget"
 mkdir -p "$WIDGET_DIR/Contents/MacOS"
-compile_widget "arm64-apple-macosx14.0" "$BUILD_DIR/GotaWidget-arm64"
-if [ "$X86_OK" -eq 1 ] && compile_widget "x86_64-apple-macosx14.0" "$BUILD_DIR/GotaWidget-x86_64"; then
-  lipo -create -output "$WIDGET_DIR/Contents/MacOS/GotaWidget" \
-    "$BUILD_DIR/GotaWidget-arm64" "$BUILD_DIR/GotaWidget-x86_64"
+compile_widget "arm64-apple-macosx14.0" "$BUILD_DIR/WaterTrackerWidget-arm64"
+if [ "$X86_OK" -eq 1 ] && compile_widget "x86_64-apple-macosx14.0" "$BUILD_DIR/WaterTrackerWidget-x86_64"; then
+  lipo -create -output "$WIDGET_DIR/Contents/MacOS/WaterTrackerWidget" \
+    "$BUILD_DIR/WaterTrackerWidget-arm64" "$BUILD_DIR/WaterTrackerWidget-x86_64"
 else
-  cp "$BUILD_DIR/GotaWidget-arm64" "$WIDGET_DIR/Contents/MacOS/GotaWidget"
+  cp "$BUILD_DIR/WaterTrackerWidget-arm64" "$WIDGET_DIR/Contents/MacOS/WaterTrackerWidget"
 fi
 cp Resources/Widget-Info.plist "$WIDGET_DIR/Contents/Info.plist"
 # O macOS só executa o "+" se a extensão trouxer a ficha do AddBottleIntent. O Xcode
 # gera essa ficha sozinho; aqui (só swiftc) ela é escrita à mão e precisa bater com o
-# nome do módulo (-module-name acima) e do intent em Widget/GotaWidget.swift.
+# nome do módulo (-module-name acima) e do intent em Widget/WaterTrackerWidget.swift.
 mkdir -p "$WIDGET_DIR/Contents/Resources"
 cp -R Resources/Widget-Metadata.appintents "$WIDGET_DIR/Contents/Resources/Metadata.appintents"
 
@@ -86,7 +86,7 @@ if [ ! -d garmin/node_modules ] && command -v npm >/dev/null; then
 fi
 if [ -d garmin/node_modules ]; then
   mkdir -p "$HELPER_DIR"
-  cp garmin/gota-garmin.mjs garmin/package.json garmin/package-lock.json "$HELPER_DIR/"
+  cp garmin/water-tracker-garmin.mjs garmin/package.json garmin/package-lock.json "$HELPER_DIR/"
   ditto garmin/node_modules "$HELPER_DIR/node_modules"
   if command -v npm >/dev/null; then
     (cd "$HELPER_DIR" && npm prune --omit=dev --no-audit --no-fund >/dev/null)

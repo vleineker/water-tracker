@@ -5,13 +5,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt_BR</string>
 	<key>CFBundleDisplayName</key>
-	<string>Gota</string>
+	<string>Water Tracker</string>
 	<key>CFBundleExecutable</key>
-	<string>GotaWidget</string>
+	<string>WaterTrackerWidget</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.vleineker.gota.widget</string>
 	<key>CFBundleName</key>
-	<string>GotaWidget</string>
+	<string>WaterTrackerWidget</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>

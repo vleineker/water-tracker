@@ -3,7 +3,7 @@ import ServiceManagement
 import AppKit
 import Observation
 
-/// Namespace sobre SMAppService.mainApp — login item do Gota.
+/// Namespace sobre SMAppService.mainApp — login item do Water Tracker.
 enum LoginItemManager {
     static var status: SMAppService.Status {
         SMAppService.mainApp.status

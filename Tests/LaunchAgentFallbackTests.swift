@@ -24,9 +24,9 @@ struct LaunchAgentFallbackTests {
     }
 
     @Test func plistOpensTheAppAtLogin() {
-        let contents = LaunchAgentFallback.contents(appPath: "/Applications/Gota.app")
+        let contents = LaunchAgentFallback.contents(appPath: "/Applications/Water Tracker.app")
         #expect(contents["Label"] as? String == "com.vleineker.gota")
-        #expect(contents["ProgramArguments"] as? [String] == ["/usr/bin/open", "-a", "/Applications/Gota.app"])
+        #expect(contents["ProgramArguments"] as? [String] == ["/usr/bin/open", "-a", "/Applications/Water Tracker.app"])
         #expect(contents["RunAtLoad"] as? Bool == true)
     }
 }

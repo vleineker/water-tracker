@@ -49,7 +49,7 @@ enum GarminProblem: Equatable {
     case helperOutdated
     /// Nem `/opt/homebrew/bin/node` nem `/usr/local/bin/node`.
     case nodeMissing
-    /// O `.app` não traz `Resources/garmin/gota-garmin.mjs`.
+    /// O `.app` não traz `Resources/garmin/water-tracker-garmin.mjs`.
     case helperMissing
     /// `usage`, `internal`, código desconhecido ou resposta ilegível.
     case helperFailed
@@ -146,7 +146,7 @@ enum GarminSync {
         )
     }
 
-    /// Registro único ao ligar o interruptor, para o que já estava no Gota hoje não
+    /// Registro único ao ligar o interruptor, para o que já estava no Water Tracker hoje não
     /// sumir quando o total passar a vir do Garmin.
     ///
     /// Regra: manda o ml de hoje menos o que o Garmin já tem dele (o último total de

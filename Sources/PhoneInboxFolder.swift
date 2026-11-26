@@ -21,14 +21,14 @@ enum PhoneInboxFolder {
             do {
                 try fm.createDirectory(at: inbox, withIntermediateDirectories: true)
             } catch {
-                NSLog("Gota: não deu para criar \(inbox.path): \(error.localizedDescription)")
+                NSLog("Water Tracker: não deu para criar \(inbox.path): \(error.localizedDescription)")
             }
             return []
         }
         do {
             return try fm.contentsOfDirectory(atPath: inbox.path)
         } catch {
-            NSLog("Gota: não deu para ler \(inbox.path): \(error.localizedDescription)")
+            NSLog("Water Tracker: não deu para ler \(inbox.path): \(error.localizedDescription)")
             return []
         }
     }
@@ -44,11 +44,11 @@ enum PhoneInboxFolder {
                 do {
                     try FileManager.default.removeItem(at: url)
                 } catch {
-                    NSLog("Gota: não deu para apagar \(name): \(error.localizedDescription)")
+                    NSLog("Water Tracker: não deu para apagar \(name): \(error.localizedDescription)")
                 }
             }
             if let coordinationError {
-                NSLog("Gota: não deu para apagar \(name): \(coordinationError.localizedDescription)")
+                NSLog("Water Tracker: não deu para apagar \(name): \(coordinationError.localizedDescription)")
             }
         }
     }
