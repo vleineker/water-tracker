@@ -1,4 +1,4 @@
-# gota-garmin
+# water-tracker-garmin
 
 Ajudante em Node que lê e grava a hidratação do dia no Garmin Connect. O app
 Swift chama este comando e lê a resposta em JSON (issue #8). Nenhuma API oficial
@@ -81,7 +81,7 @@ repositório. O token de acesso dura pouco: quando o Garmin o recusa, a
 biblioteca o renova sozinha e o ajudante regrava os arquivos. Quando a renovação
 também é recusada, a resposta é `auth_required` e nenhum login automático é
 tentado, o que evita bloqueio da conta. Para sair, basta apagar a pasta.
-`GOTA_GARMIN_TOKEN_DIR` troca a pasta; `GOTA_GARMIN_API_BASE` só existe para os
+`WATER_TRACKER_GARMIN_TOKEN_DIR` troca a pasta; `WATER_TRACKER_GARMIN_API_BASE` só existe para os
 testes.
 
 ## Diferenças em relação à biblioteca
@@ -100,12 +100,12 @@ prontas de hidratação dela, por três motivos:
 ## Roteiro de validação com a conta real
 
 1. `cd garmin && npm ci`
-2. `node gota-garmin.mjs login` e digitar e-mail, senha e código.
-3. `node gota-garmin.mjs get $(date +%F)` e comparar `ml` com o app Garmin
+2. `node water-tracker-garmin.mjs login` e digitar e-mail, senha e código.
+3. `node water-tracker-garmin.mjs get $(date +%F)` e comparar `ml` com o app Garmin
    Connect.
-4. `node gota-garmin.mjs add 50 $(date +%FT%T)` e conferir que `total_ml` subiu
+4. `node water-tracker-garmin.mjs add 50 $(date +%FT%T)` e conferir que `total_ml` subiu
    50 e que a entrada aparece no app e no relógio.
-5. Desfazer com `node gota-garmin.mjs add -50 $(date +%FT%T)` e confirmar com
+5. Desfazer com `node water-tracker-garmin.mjs add -50 $(date +%FT%T)` e confirmar com
    `get` que o total voltou.
 
 Validado com a conta real em 2026-11-05: login, leitura, gravação de 50 ml no

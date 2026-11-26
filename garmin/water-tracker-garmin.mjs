@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gota ↔ Garmin Connect helper. Contract: see garmin/README.md.
+// Water Tracker ↔ Garmin Connect helper. Contract: see garmin/README.md.
 //
 // stdout carries exactly one JSON line per run, success or failure. Everything
 // else (library logs, interactive prompts) goes to stderr, so the Swift app can
@@ -12,7 +12,7 @@ import readline from 'node:readline';
 import { pathToFileURL } from 'node:url';
 
 export const TOKEN_DIR =
-  process.env.GOTA_GARMIN_TOKEN_DIR ||
+  process.env.WATER_TRACKER_GARMIN_TOKEN_DIR ||
   path.join(os.homedir(), 'Library', 'Application Support', 'Gota', 'garmin');
 const OAUTH1_FILE = 'oauth1_token.json';
 const OAUTH2_FILE = 'oauth2_token.json';
@@ -155,8 +155,8 @@ async function newClient(credentials = { username: '', password: '' }) {
   gc.client.client.defaults.timeout = REQUEST_TIMEOUT_MS;
   // Test seam: point every API call at a local fake and skip the consumer-key download,
   // so the test suite never reaches Garmin.
-  if (process.env.GOTA_GARMIN_API_BASE) {
-    gc.url.GC_API = process.env.GOTA_GARMIN_API_BASE;
+  if (process.env.WATER_TRACKER_GARMIN_API_BASE) {
+    gc.url.GC_API = process.env.WATER_TRACKER_GARMIN_API_BASE;
     gc.client.OAUTH_CONSUMER = { key: 'test', secret: 'test' };
   }
   return gc;
@@ -302,7 +302,7 @@ async function cmdLogin() {
   return { ok: true, display_name, mfa: mfaUsed, token_dir: TOKEN_DIR };
 }
 
-const USAGE = 'Uso: gota-garmin login | get <AAAA-MM-DD> | add <ml> <horário ISO>';
+const USAGE = 'Uso: water-tracker-garmin login | get <AAAA-MM-DD> | add <ml> <horário ISO>';
 
 export async function main(argv) {
   routeConsoleToStderr();
