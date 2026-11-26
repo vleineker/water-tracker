@@ -1,11 +1,11 @@
 {
-  "name": "gota-garmin",
+  "name": "water-tracker-garmin",
   "version": "0.1.0",
   "private": true,
-  "description": "Gota helper: read and write hydration on Garmin Connect via JSON CLI.",
+  "description": "Water Tracker helper: read and write hydration on Garmin Connect via JSON CLI.",
   "type": "module",
   "bin": {
-    "gota-garmin": "./gota-garmin.mjs"
+    "water-tracker-garmin": "./water-tracker-garmin.mjs"
   },
   "engines": {
     "node": ">=20"

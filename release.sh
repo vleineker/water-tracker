@@ -3,7 +3,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
-APP_NAME="Gota"
+APP_NAME="Water Tracker"
 INSTALL_DIR="$HOME/Applications/$APP_NAME.app"
 DIST_DIR="dist"
 
@@ -43,10 +43,10 @@ fi
 echo "==> Criando release v$VERSION"
 gh release create "v$VERSION" "$ZIP_PATH" \
   --title "$APP_NAME v$VERSION" --notes-file - <<EOF
-O que é: Gota é um lembrete e tracker de água para a barra de menus
+O que é: Water Tracker é um lembrete e tracker de água para a barra de menus
 do macOS.
 
-Como instalar: baixe o zip acima, descompacte e mova Gota.app para
+Como instalar: baixe o zip acima, descompacte e mova "Water Tracker.app" para
 ~/Applications (ou /Applications), depois abra. Detalhes do aviso de
 segurança do macOS na primeira abertura: seção "Instalar" do README.
 EOF

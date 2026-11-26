@@ -1,6 +1,6 @@
 import Foundation
 
-/// LaunchAgent de reserva que abre o Gota ao iniciar sessão quando
+/// LaunchAgent de reserva que abre o Water Tracker ao iniciar sessão quando
 /// `SMAppService.mainApp.register()` falha.
 ///
 /// É puro: diz onde fica o arquivo, o que vai dentro e quando ele deve sair. Gravar e

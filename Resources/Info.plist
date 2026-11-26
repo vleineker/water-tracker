@@ -5,15 +5,15 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt_BR</string>
 	<key>CFBundleDisplayName</key>
-	<string>Gota</string>
+	<string>Water Tracker</string>
 	<key>CFBundleExecutable</key>
-	<string>Gota</string>
+	<string>Water Tracker</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.vleineker.gota</string>
 	<key>CFBundleName</key>
-	<string>Gota</string>
+	<string>Water Tracker</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,6 +27,6 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Gota</string>
+	<string>Water Tracker</string>
 </dict>
 </plist>

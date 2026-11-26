@@ -142,7 +142,7 @@ final class HydrationStore {
 
     /// Total de hoje lido do Garmin. Substitui o ml de hoje pelo do Garmin mais o que
     /// de hoje ainda está na fila, para meta, streak, gota e lembrete contarem também
-    /// o que veio do relógio. A meta continua sendo a do Gota.
+    /// o que veio do relógio. A meta continua sendo a do Water Tracker.
     func applyGarminToday(_ garminML: Int, dayKey: String) {
         refreshDay()
         guard dayKey == todayKey else { return }
@@ -198,7 +198,7 @@ final class HydrationStore {
                 recordTodayGoal()
                 trimHistory()
                 persist()
-                NSLog("Gota: \(outcome.addedBottles) garrafa(s) do iPhone somada(s)")
+                NSLog("Water Tracker: \(outcome.addedBottles) garrafa(s) do iPhone somada(s)")
                 onChange?()
                 if settings.garminEnabled { onGarminWork?(.bottle) }
             }

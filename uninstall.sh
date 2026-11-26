@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-APP_NAME="Gota"
+APP_NAME="Water Tracker"
 BUNDLE_ID="com.vleineker.gota"
 INSTALL_DIR="$HOME/Applications/$APP_NAME.app"
 LAUNCH_AGENT="$HOME/Library/LaunchAgents/$BUNDLE_ID.plist"
@@ -26,4 +26,4 @@ rm -rf "$INSTALL_DIR"
 echo "==> Removendo preferências (defaults)"
 defaults delete "$BUNDLE_ID" 2>/dev/null || true
 
-echo "==> Gota desinstalado."
+echo "==> Water Tracker desinstalado."

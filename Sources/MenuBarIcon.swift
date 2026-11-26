@@ -12,7 +12,7 @@ enum MenuBarIcon {
             return true
         }
         image.isTemplate = true
-        image.accessibilityDescription = "Gota"
+        image.accessibilityDescription = "Water Tracker"
         return image
     }
 

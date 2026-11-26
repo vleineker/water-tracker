@@ -80,7 +80,7 @@ final class NotificationManager: NSObject {
             trigger: nil
         )
         UNUserNotificationCenter.current().add(request) { error in
-            if let error { NSLog("Gota: falha no lembrete de teste: \(error.localizedDescription)") }
+            if let error { NSLog("Water Tracker: falha no lembrete de teste: \(error.localizedDescription)") }
         }
     }
 }

@@ -1,4 +1,4 @@
-# Gota — Handoff de design do painel (MenuBarExtra)
+# Water Tracker — Handoff de design do painel (MenuBarExtra)
 
 Spec para implementação em SwiftUI puro. Nenhum asset além do ícone do app. Nenhuma mudança de funcionalidade, de textos de ação nem da lógica de lembretes.
 
@@ -16,7 +16,7 @@ Referências visuais em `states/` (PNG @2x, 1:1 = 250 pt de largura) e `icon/`.
 | Padding externo | top 12 · leading/trailing 14 · bottom 6 |
 | Spacing vertical entre seções | 8 (VStack raiz: `VStack(alignment: .leading, spacing: 8)`) |
 | Fonte | SF Pro via text styles do sistema (nunca `.system(size:)`) |
-| Cor de acento | `Color.gotaAccent` = `Color(nsColor: .systemBlue)`, aplicado também como `.tint(.gotaAccent)` na raiz do painel — único azul do painel. Fixado em systemBlue (não `Color.gotaAccent`) porque com o acento "Grafite" do macOS o "+1 garrafa" e a barra ficavam cinzas. Aparece em exatamente 3 lugares: fill da barra, pontos de streak com meta batida, botão `.borderedProminent` (mais o ícone da linha condicional "Nova versão", [5b]) |
+| Cor de acento | `Color.waterTrackerAccent` = `Color(nsColor: .systemBlue)`, aplicado também como `.tint(.waterTrackerAccent)` na raiz do painel — único azul do painel. Fixado em systemBlue (não `Color.waterTrackerAccent`) porque com o acento "Grafite" do macOS o "+1 garrafa" e a barra ficavam cinzas. Aparece em exatamente 3 lugares: fill da barra, pontos de streak com meta batida, botão `.borderedProminent` (mais o ícone da linha condicional "Nova versão", [5b]) |
 | Demais cores | `.primary`, `.secondary`, `.quaternary` (fills), `Divider()` padrão |
 | Ícones | SF Symbols, sempre `.imageScale(.small)` ou `font(.caption)` conforme tabela |
 | Animação | `withAnimation(.easeOut(duration: 0.2))` ao mudar a barra e os pontos; `.animation(.easeInOut(duration: 0.2))` ao expandir Ajustes. Nada mais anima. |
@@ -47,16 +47,16 @@ Referências visuais em `states/` (PNG @2x, 1:1 = 250 pt de largura) e `icon/`.
 ### [1] Header — `HStack(alignment: .firstTextBaseline)`
 | Elemento | Componente | Tipografia | Cor | Observações |
 |---|---|---|---|---|
-| "Gota" | `Text` | `.headline` | `.primary` | leading |
-| (só em notif. off) `bell.slash` | `Image(systemName:)` | `.caption` | `.secondary` | 6 pt à direita de "Gota". Ver estado 4 |
-| (só em meta batida) `checkmark.circle.fill` | `Image(systemName:)` | `.body` | `Color.gotaAccent` | 5 pt antes da contagem. Ver estado 3 |
+| "Water Tracker" | `Text` | `.headline` | `.primary` | leading |
+| (só em notif. off) `bell.slash` | `Image(systemName:)` | `.caption` | `.secondary` | 6 pt à direita de "Water Tracker". Ver estado 4 |
+| (só em meta batida) `checkmark.circle.fill` | `Image(systemName:)` | `.body` | `Color.waterTrackerAccent` | 5 pt antes da contagem. Ver estado 3 |
 | Contagem "**2** de 4 garrafas" | `Text` concatenado | `.body`; o número com `.fontWeight(.semibold)` | número `.primary`, resto `.secondary` | trailing (`Spacer()` entre) |
 
 ### [2] Barra de progresso
 | Elemento | Componente | Medidas | Cor |
 |---|---|---|---|
 | Trilho | `Capsule()` | altura 4, largura total | `.quaternary` (`.fill(.quaternary)`) |
-| Preenchimento | `Capsule()` sobreposto via `GeometryReader` ou `.overlay(alignment: .leading)` | altura 4, largura = `count / goal` × largura total | `Color.gotaAccent` |
+| Preenchimento | `Capsule()` sobreposto via `GeometryReader` ou `.overlay(alignment: .leading)` | altura 4, largura = `count / goal` × largura total | `Color.waterTrackerAccent` |
 
 Não usar `ProgressView` — o estilo linear nativo tem 6 pt e borda própria. Duas `Capsule` é mais fiel.
 
@@ -89,7 +89,7 @@ Só aparece quando a release mais recente no GitHub (`releases/latest`, `tag_nam
 
 | Elemento | Componente | Tipografia | Cor | Observações |
 |---|---|---|---|---|
-| `arrow.down.circle` + "Nova versão 1.1 disponível" | `Button` `.buttonStyle(.borderless)` com `HStack(spacing: 4)` | `.caption` | ícone `Color.gotaAccent`, texto `.secondary` | Clique abre `html_url` da release via `NSWorkspace.shared.open`. Sem fundo, sem cor de alerta. |
+| `arrow.down.circle` + "Nova versão 1.1 disponível" | `Button` `.buttonStyle(.borderless)` com `HStack(spacing: 4)` | `.caption` | ícone `Color.waterTrackerAccent`, texto `.secondary` | Clique abre `html_url` da release via `NSWorkspace.shared.open`. Sem fundo, sem cor de alerta. |
 
 ### [6] Rodapé — `HStack`
 | Elemento | Componente | Estilo | Cor | Observações |
@@ -106,7 +106,7 @@ Para alinhar com as bordas do texto acima: engrenagem com `.padding(.leading, -4
 
 | Elemento | Text style | Peso |
 |---|---|---|
-| "Gota" | `.headline` | (bold, padrão do style) |
+| "Water Tracker" | `.headline` | (bold, padrão do style) |
 | Contagem — número | `.body` | `.semibold` |
 | Contagem — "de 4 garrafas" | `.body` | regular |
 | "1,0 L de 2,0 L", "3 dias" | `.caption` | regular |
@@ -121,10 +121,10 @@ Para alinhar com as bordas do texto acima: engrenagem com `.padding(.leading, -4
 
 | Elemento | Cor semântica |
 |---|---|
-| "Gota", número da contagem, labels de Ajustes, ícone da engrenagem quando ativo | `.primary` |
+| "Water Tracker", número da contagem, labels de Ajustes, ícone da engrenagem quando ativo | `.primary` |
 | "de 4 garrafas", litros, "N dias", "−1", "Sair", engrenagem, `bell.slash`, valores dos steppers | `.secondary` |
 | Trilho da barra, pontos sem meta, fundo da engrenagem ativa | `.quaternary` |
-| Fill da barra, pontos com meta, anel de "hoje", botão prominente, `checkmark.circle.fill`, toggles ligados, ícone de "Nova versão" | `Color.gotaAccent` |
+| Fill da barra, pontos com meta, anel de "hoje", botão prominente, `checkmark.circle.fill`, toggles ligados, ícone de "Nova versão" | `Color.waterTrackerAccent` |
 | Separadores | `Divider()` padrão |
 
 Nenhuma cor "de sucesso" (verde) na meta batida: continua accent. Nenhuma cor de alerta.
@@ -144,10 +144,10 @@ Nenhuma cor "de sucesso" (verde) na meta batida: continua accent. Nenhuma cor de
 
 | Dia | `metGoal` | Ponto |
 |---|---|---|
-| Passado | `true` | `Circle().fill(Color.gotaAccent)` |
+| Passado | `true` | `Circle().fill(Color.waterTrackerAccent)` |
 | Passado | `false` / sem registro | `Circle().fill(.quaternary)` |
-| Hoje | `false` | `Circle().strokeBorder(Color.gotaAccent, lineWidth: 1)` (anel) |
-| Hoje | `true` | `Circle().fill(Color.gotaAccent)` |
+| Hoje | `false` | `Circle().strokeBorder(Color.waterTrackerAccent, lineWidth: 1)` (anel) |
+| Hoje | `true` | `Circle().fill(Color.waterTrackerAccent)` |
 
 Texto ao lado: `"\(streak) dias"` (`"1 dia"` no singular; `"0 dias"` quando zero — manter o texto, não esconder).
 
@@ -162,7 +162,7 @@ Isto substitui integralmente a faixa de 7 barras.
 | 1 | **0 garrafas** | Contagem "**0** de 4 garrafas"; barra com fill de largura 0; litros "0,0 L de 2,0 L"; botão "−1" **oculto** (`if count > 0`). Ponto de hoje = anel. |
 | 2 | **Parcial** (base) | Como descrito na seção 1. |
 | 3 | **Meta batida** (`count >= goal`) | `checkmark.circle.fill` em accent (`.body`) 5 pt antes da contagem; barra 100 %; ponto de hoje preenchido; `streak` já inclui hoje; "+1 garrafa" troca para `.buttonStyle(.bordered)` (mesma ação, mesmo texto — só perde o destaque). "−1" continua visível. Se `count > goal`, barra fica em 100 % e a contagem mostra o número real ("5 de 4 garrafas"). |
-| 4 | **Notificações desativadas** (toggle "Lembretes" off ou permissão negada) | `Image(systemName: "bell.slash")` `.caption` `.secondary` a 6 pt da direita de "Gota", com `.help("Lembretes desativados")`. Nada mais muda. |
+| 4 | **Notificações desativadas** (toggle "Lembretes" off ou permissão negada) | `Image(systemName: "bell.slash")` `.caption` `.secondary` a 6 pt da direita de "Water Tracker", com `.help("Lembretes desativados")`. Nada mais muda. |
 | 5 | **Ajustes expandido** (`settingsExpanded == true`) | Entre o `Divider` [5] e o rodapé entra a seção de Ajustes (abaixo), seguida de outro `Divider()` e spacing 8. Engrenagem com fundo `.quaternary` e ícone `.primary`. Altura total 374 pt. Fecha ao clicar de novo na engrenagem; fechar o painel também colapsa (`settingsExpanded = false` em `onDisappear`). |
 | — | **Modo claro** | Nada a fazer: todas as cores são semânticas. |
 
@@ -227,13 +227,13 @@ struct PanelView: View {
         .padding(.horizontal, 14)
         .padding(.bottom, 6)
         .frame(width: 250)
-        .tint(.gotaAccent)
+        .tint(.waterTrackerAccent)
         .onDisappear { settingsExpanded = false }
     }
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text("Gota").font(.headline)
+            Text("Water Tracker").font(.headline)
             if !model.remindersEnabled {
                 Image(systemName: "bell.slash")
                     .font(.caption).foregroundStyle(.secondary)
@@ -242,7 +242,7 @@ struct PanelView: View {
             Spacer()
             if model.goalMet {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.body).foregroundStyle(Color.gotaAccent)
+                    .font(.body).foregroundStyle(Color.waterTrackerAccent)
             }
             (Text("\(model.count)").fontWeight(.semibold)
              + Text(" de \(model.goal) garrafas").foregroundStyle(.secondary))
@@ -254,7 +254,7 @@ struct PanelView: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)
-                Capsule().fill(Color.gotaAccent)
+                Capsule().fill(Color.waterTrackerAccent)
                     .frame(width: geo.size.width * model.progress) // min(count/goal, 1)
             }
         }
@@ -269,10 +269,10 @@ struct PanelView: View {
             HStack(spacing: 3) {
                 ForEach(model.last7Days) { day in
                     Circle()
-                        .fill(day.met ? Color.gotaAccent : Color.clear)
+                        .fill(day.met ? Color.waterTrackerAccent : Color.clear)
                         .overlay {
                             if !day.met {
-                                if day.isToday { Circle().strokeBorder(Color.gotaAccent, lineWidth: 1) }
+                                if day.isToday { Circle().strokeBorder(Color.waterTrackerAccent, lineWidth: 1) }
                                 else { Circle().fill(.quaternary) }
                             }
                         }
@@ -329,7 +329,7 @@ struct PanelView: View {
 ## 8. Checklist de aceite
 
 - [ ] Largura 250 pt; altura 132 pt no estado base, 374 pt com Ajustes
-- [ ] Nenhum `Color(hex:)`, `Color(red:green:blue:)` ou `.blue` solto no painel — só `Color.gotaAccent` (systemBlue fixo) e cores semânticas
+- [ ] Nenhum `Color(hex:)`, `Color(red:green:blue:)` ou `.blue` solto no painel — só `Color.waterTrackerAccent` (systemBlue fixo) e cores semânticas
 - [ ] Nenhum `.background` no container (o `MenuBarExtra` fornece o material)
 - [ ] Nenhum `.font(.system(size:))` — só text styles
 - [ ] "−1" some em 0 garrafas; "+1 garrafa" vira `.bordered` ao bater a meta

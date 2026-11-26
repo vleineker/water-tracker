@@ -15,7 +15,7 @@ final class PanelUIState {
 extension Color {
     /// Acento único do painel, fixado em systemBlue. `Color.accentColor` segue o
     /// acento do macOS e com "Grafite" deixava o "+1 garrafa" e a barra cinzas.
-    static let gotaAccent = Color(nsColor: .systemBlue)
+    static let waterTrackerAccent = Color(nsColor: .systemBlue)
 }
 
 struct PanelView: View {
@@ -66,7 +66,7 @@ struct PanelView: View {
         .padding(.horizontal, 14)
         .padding(.bottom, 6)
         .frame(width: 250)
-        .tint(.gotaAccent)
+        .tint(.waterTrackerAccent)
         .onAppear {
             NotificationManager.shared.refreshStatus()
             updater.checkIfDue()
@@ -83,7 +83,7 @@ struct PanelView: View {
 
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text("Gota").font(.headline).foregroundStyle(.primary)
+            Text("Water Tracker").font(.headline).foregroundStyle(.primary)
             if NotificationManager.shared.authorizationDenied {
                 Image(systemName: "bell.slash")
                     .font(.caption)
@@ -95,7 +95,7 @@ struct PanelView: View {
                 if goalMet {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.body)
-                        .foregroundStyle(Color.gotaAccent)
+                        .foregroundStyle(Color.waterTrackerAccent)
                 }
                 countText
             }
@@ -114,7 +114,7 @@ struct PanelView: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)
-                Capsule().fill(Color.gotaAccent)
+                Capsule().fill(Color.waterTrackerAccent)
                     .frame(width: geo.size.width * progress)
             }
         }
@@ -143,9 +143,9 @@ struct PanelView: View {
     @ViewBuilder
     private func streakDot(_ day: StreakDay) -> some View {
         if day.met {
-            Circle().fill(Color.gotaAccent).frame(width: 5, height: 5)
+            Circle().fill(Color.waterTrackerAccent).frame(width: 5, height: 5)
         } else if day.isToday {
-            Circle().strokeBorder(Color.gotaAccent, lineWidth: 1).frame(width: 5, height: 5)
+            Circle().strokeBorder(Color.waterTrackerAccent, lineWidth: 1).frame(width: 5, height: 5)
         } else {
             Circle().fill(.quaternary).frame(width: 5, height: 5)
         }
@@ -304,7 +304,7 @@ struct PanelView: View {
             NSWorkspace.shared.open(release.url)
         } label: {
             HStack(spacing: 4) {
-                Image(systemName: "arrow.down.circle").foregroundStyle(Color.gotaAccent)
+                Image(systemName: "arrow.down.circle").foregroundStyle(Color.waterTrackerAccent)
                 Text("Nova versão \(release.version) disponível").foregroundStyle(.secondary)
             }
             .font(.caption)

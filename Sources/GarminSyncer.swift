@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-/// Roda o ajudante `gota-garmin.mjs` (dentro do `.app`, em `Resources/garmin`) com o
+/// Roda o ajudante `water-tracker-garmin.mjs` (dentro do `.app`, em `Resources/garmin`) com o
 /// `node` do Homebrew. Uma execução por vez, fora da thread principal.
 enum GarminHelper {
     static let nodeCandidates = ["/opt/homebrew/bin/node", "/usr/local/bin/node"]
@@ -13,13 +13,13 @@ enum GarminHelper {
     }
 
     static var scriptPath: String? {
-        Bundle.main.url(forResource: "gota-garmin", withExtension: "mjs", subdirectory: "garmin")?.path
+        Bundle.main.url(forResource: "water-tracker-garmin", withExtension: "mjs", subdirectory: "garmin")?.path
     }
 
     /// Comando para colar no Terminal quando falta a sessão do Garmin.
     static var loginCommand: String {
         let node = nodePath ?? nodeCandidates[0]
-        let script = scriptPath ?? "~/Applications/Gota.app/Contents/Resources/garmin/gota-garmin.mjs"
+        let script = scriptPath ?? "~/Applications/Water Tracker.app/Contents/Resources/garmin/water-tracker-garmin.mjs"
         return "'\(node)' '\(script)' login"
     }
 
@@ -42,7 +42,7 @@ enum GarminHelper {
         do {
             try process.run()
         } catch {
-            NSLog("Gota: não deu para rodar o ajudante do Garmin: \(error.localizedDescription)")
+            NSLog("Water Tracker: não deu para rodar o ajudante do Garmin: \(error.localizedDescription)")
             return .failed(.helperFailed)
         }
         let watchdog = DispatchWorkItem { if process.isRunning { process.terminate() } }
@@ -64,7 +64,7 @@ enum GarminHelper {
         let reply = GarminReply.parse(String(decoding: outData, as: UTF8.self))
         if case .failed(let problem) = reply {
             let tail = String(decoding: errData.suffix(500), as: UTF8.self)
-            NSLog("Gota: ajudante do Garmin (\(arguments.first ?? "")) falhou: \(problem); stderr: \(tail)")
+            NSLog("Water Tracker: ajudante do Garmin (\(arguments.first ?? "")) falhou: \(problem); stderr: \(tail)")
         }
         return reply
     }

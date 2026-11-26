@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 @main
-struct GotaApp: App {
+struct WaterTrackerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Bindable private var store = HydrationStore.shared
 

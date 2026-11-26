@@ -2,7 +2,7 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
-/// Widget de desktop do Gota: o cartão é um tanque que enche conforme o dia avança
+/// Widget de desktop do Water Tracker: o cartão é um tanque que enche conforme o dia avança
 /// rumo à meta, com um "+" que registra uma garrafa. Os dados vêm do arquivo que o
 /// app grava (ver `WidgetSnapshot`); o widget nunca lê as preferências do app.
 
@@ -139,12 +139,12 @@ struct TankView: View {
 }
 
 @main
-struct GotaWidget: Widget {
+struct WaterTrackerWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "com.vleineker.gota.tank", provider: TankProvider()) { entry in
             TankView(snapshot: entry.snapshot)
         }
-        .configurationDisplayName("Gota")
+        .configurationDisplayName("Water Tracker")
         .description("Quanto você já bebeu hoje, com um toque para registrar uma garrafa.")
         .supportedFamilies([.systemSmall])
         .contentMarginsDisabled()
