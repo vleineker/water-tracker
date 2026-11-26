@@ -1,4 +1,4 @@
-# Gota v2 — brief de design (para Claude Design)
+# Water Tracker v2 — brief de design (para Claude Design)
 
 > Cole o bloco abaixo como primeira mensagem no Claude Design. Anexe 2 capturas:
 > o painel
@@ -10,7 +10,7 @@
 
 ## Prompt
 
-Você vai redesenhar o painel de um app nativo de macOS chamado **Gota**: um
+Você vai redesenhar o painel de um app nativo de macOS chamado **Water Tracker**: um
 utilitário que vive só na barra de menus (ícone de gota + "2/4") e lembra de
 beber água, contando garrafas por dia. Funcionalidade está pronta e aprovada. O
 trabalho é **só visual**, e o resultado precisa ser implementável em SwiftUI
@@ -24,8 +24,8 @@ puro, sem assets além do ícone do app.
   `Button` (`.bordered`, `.borderedProminent`, `.borderless`), `Stepper`,
   `Toggle`, `DisclosureGroup`, `Divider`, SF Symbols, SF Pro com text styles do
   sistema (`.headline`, `.body`, `.callout`, `.caption`).
-- **Uma única cor de acento**: systemBlue fixo (`Color.gotaAccent` +
-  `.tint(.gotaAccent)` na raiz do painel), não `Color.accentColor` — este segue o
+- **Uma única cor de acento**: systemBlue fixo (`Color.waterTrackerAccent` +
+  `.tint(.waterTrackerAccent)` na raiz do painel), não `Color.accentColor` — este segue o
   acento do macOS e com "Grafite" deixava o botão e a barra cinzas. Todo o resto em
   cores semânticas do sistema (`.primary`, `.secondary`, `.quaternary`). Hoje há
   três tons de azul diferentes (gráfico, anel, botão) e isso precisa sumir.
@@ -34,7 +34,7 @@ puro, sem assets além do ícone do app.
 
 ### O que existe hoje (e o que está errado)
 
-1. Header "Gota · Hoje, 14 de out." → data é ruído, remover.
+1. Header "Water Tracker · Hoje, 14 de out." → data é ruído, remover.
 2. Anel de progresso 120 pt com "0/4" e "0,0 L de 2,0 L" → grande demais para
    representar 4 garrafas; quero algo bem menor e mais simples (ex.: 4
    pontos/gotas que preenchem, barra fina, ou anel ≤ 56 pt).
@@ -83,8 +83,8 @@ Não altere funcionalidades, textos de ação ("+1 garrafa", "Bebi uma garrafa",
 ## Quando voltar
 
 Traga o markdown do handoff e os PNGs para esta pasta — o handoff final ficou
-em `~/projects/water-tracker/design/gota-handoff.md`, não em `docs/` — e abra a
-demanda com Futaba: "implementa o handoff de design v2 do Gota". O bug
+em `~/projects/water-tracker/design/water-tracker-handoff.md`, não em `docs/` — e abra a
+demanda com Futaba: "implementa o handoff de design v2 do Water Tracker". O bug
 funcional já conhecido na época (o painel mostra "Notificações desativadas"
 mesmo com permissão concedida; status precisa ser relido via
 `getNotificationSettings` ao abrir o painel, não só no launch) foi corrigido no

@@ -1,4 +1,4 @@
-# Gota
+# Water Tracker
 
 Lembrete e tracker de água na barra de menus do macOS. Registre cada
 garrafa pelo Mac, por um Atalho do iPhone ou, se quiser, pelo relógio
@@ -26,7 +26,7 @@ Node.
 
 ### Lembrete só quando atrasado
 
-O Gota não lembra de hora em hora. Ele divide a meta pelo dia ativo
+O Water Tracker não lembra de hora em hora. Ele divide a meta pelo dia ativo
 (entre o início e o fim dos Ajustes) e só avisa quando o que você
 bebeu fica atrás desse ritmo. Exemplo com meta de 4 garrafas das 8h
 às 22h: com nada bebido, o aviso vem às 8h; com 2 garrafas, só às
@@ -39,7 +39,7 @@ então chega mesmo com o Mac dormindo e acordando.
 
 Na primeira execução, o macOS pede permissão: clique em "Permitir"
 para receber os lembretes. Recomendado: em **Ajustes do Sistema >
-Notificações > Gota**, trocar o estilo de **Banners** para
+Notificações > Water Tracker**, trocar o estilo de **Banners** para
 **Alertas**. No estilo Banners, as ações ("Bebi uma garrafa" e
 "Lembrar em 15 min") ficam escondidas sob "Opções". Com as
 notificações negadas, o painel mostra um sino cortado ao lado do
@@ -47,15 +47,15 @@ nome.
 
 ### Widget de desktop
 
-O Gota traz um widget para o desktop do macOS: o cartão é um tanque que
+O Water Tracker traz um widget para o desktop do macOS: o cartão é um tanque que
 enche conforme o dia avança rumo à meta, e o "+" registra uma garrafa
 sem abrir o painel. Para colocar: clique com o botão direito no
-desktop, **Editar Widgets**, procure **Gota** e arraste.
+desktop, **Editar Widgets**, procure **Water Tracker** e arraste.
 
 O widget roda isolado do app, então os dois conversam por arquivos em
 `~/Library/Application Support/Gota/widget`: o app grava o total do
 dia, e cada toque no "+" deixa um arquivo que o app soma e apaga. Com o
-Gota fechado, o toque fica guardado e entra quando o app abrir no mesmo
+Water Tracker fechado, o toque fica guardado e entra quando o app abrir no mesmo
 dia.
 
 ### Registrar pelo iPhone (Atalho)
@@ -71,7 +71,7 @@ app no iPhone nem do Garmin.
 a pasta ao abrir o painel, ao acordar e a cada 15 minutos, e soma uma
 garrafa do tamanho configurado nos Ajustes por arquivo. Arquivo com
 nome fora do formato é ignorado e fica na pasta. A pasta é criada pelo
-próprio Gota na primeira leitura; se ela ainda não aparecer no iPhone,
+próprio Water Tracker na primeira leitura; se ela ainda não aparecer no iPhone,
 crie `Gota/inbox` no app Arquivos, dentro do iCloud Drive.
 
 **Montando o Atalho** (app Atalhos no iPhone, "+" para criar):
@@ -82,7 +82,7 @@ crie `Gota/inbox` no app Arquivos, dentro do iCloud Drive.
    fazem parte).
 3. Ação **Texto**, com qualquer conteúdo (por exemplo, `1`).
 4. Ação **Definir Nome**: nome = **Data Formatada** (a variável da
-   etapa 2). Com ou sem `.txt` no fim, o Gota aceita.
+   etapa 2). Com ou sem `.txt` no fim, o Water Tracker aceita.
 5. Ação **Salvar Arquivo**: desligue **Perguntar Onde Salvar**, escolha
    a pasta **iCloud Drive › Gota › inbox** e deixe **Substituir Se o
    Arquivo Existir** desligado (dois toques no mesmo segundo viram
@@ -90,9 +90,9 @@ crie `Gota/inbox` no app Arquivos, dentro do iCloud Drive.
 6. Dê um nome curto ao Atalho, como "Bebi uma garrafa", e adicione à
    Tela de Início, ao botão de Ação ou ao Apple Watch.
 
-Para conferir: rode o Atalho, abra o painel do Gota no Mac (com o
+Para conferir: rode o Atalho, abra o painel do Water Tracker no Mac (com o
 iCloud já sincronizado) e veja a garrafa somada; o arquivo some da
-pasta. O macOS pode pedir permissão para o Gota acessar o iCloud
+pasta. O macOS pode pedir permissão para o Water Tracker acessar o iCloud
 Drive na primeira leitura. Se a permissão for negada, o app segue
 funcionando, só sem as garrafas do iPhone.
 
@@ -101,7 +101,7 @@ funcionando, só sem as garrafas do iPhone.
 Desligado de fábrica. Ligado o interruptor **Garmin** nos Ajustes,
 cada garrafa do Mac ou do iPhone vai para o Garmin Connect, e o total
 de hoje passa a ser o do Garmin. Assim, o que você registra no
-relógio também entra no dia do Gota. Sem internet, as garrafas ficam
+relógio também entra no dia do Water Tracker. Sem internet, as garrafas ficam
 numa fila e vão quando a conexão voltar.
 
 Precisa de:
@@ -119,7 +119,7 @@ Precisa de:
 No relógio, o resumo de hidratação depende do modelo. No Forerunner
 265 ele vem do app gratuito **Hydration**, da loja Connect IQ,
 instalado à parte pelo app Connect IQ do celular. É nele
-que aparecem as garrafas vindas do Gota e que se registra água pelo
+que aparecem as garrafas vindas do Water Tracker e que se registra água pelo
 relógio.
 
 A Garmin não tem API oficial para água. O ajudante usa um cliente
@@ -142,8 +142,8 @@ Compila localmente, binário universal (Apple Silicon e Intel), macOS
 
 ### Pelo zip (Releases)
 
-1. Baixe `Gota-x.y.z.zip` na página de Releases do repositório.
-2. Descompacte e mova `Gota.app` para `~/Applications` (ou
+1. Baixe `Water Tracker-x.y.z.zip` na página de Releases do repositório.
+2. Descompacte e mova `Water Tracker.app` para `~/Applications` (ou
    `/Applications`).
 3. Abra o app.
 
@@ -153,12 +153,12 @@ mas o código é aberto e dá para compilar você mesmo.
 
 - **macOS 15 ou superior**: após o primeiro clique bloqueado, vá em
   **Ajustes do Sistema > Privacidade e Segurança**, role até o aviso
-  sobre o Gota e clique **Abrir Mesmo Assim** — só precisa uma vez.
+  sobre o Water Tracker e clique **Abrir Mesmo Assim** — só precisa uma vez.
 - **macOS 14**: botão direito no app > **Abrir** > **Abrir**.
 - **Alternativa via terminal**, sem passar pelo aviso:
 
   ```bash
-  xattr -d com.apple.quarantine ~/Applications/Gota.app
+  xattr -d com.apple.quarantine ~/Applications/"Water Tracker.app"
   ```
 
 Na primeira abertura o app pede permissão de notificações e se
@@ -172,8 +172,8 @@ registra como item de início — ver as seções "Notificações" e
 ```
 
 Compila via `swiftc` (SDK do Command Line Tools, sem Xcode), monta
-`build/Gota.app`, assina ad-hoc, mata qualquer instância em execução,
-instala em `~/Applications/Gota.app` e abre. `build/` é removido ao
+`build/Water Tracker.app`, assina ad-hoc, mata qualquer instância em execução,
+instala em `~/Applications/Water Tracker.app` e abre. `build/` é removido ao
 final — a cópia instalada é a única fonte de verdade.
 
 Rebuildar após qualquer mudança em `Sources/` ou
@@ -190,7 +190,7 @@ lembrete, gota da barra, Atalho do iPhone, fila do Garmin, estado
 salvo, login item) com swift-testing. O `swift test` não funciona com
 o Command Line Tools sem Xcode (o SwiftPM não consegue ler o
 `Package.swift`), então o `test.sh` compila os testes direto com
-`swiftc` num executável em `build/GotaTests`. O `build.sh` roda os
+`swiftc` num executável em `build/WaterTrackerTests`. O `build.sh` roda os
 testes antes de compilar o app e para se algum falhar. O ajudante do
 Garmin tem testes próprios: `cd garmin && npm test`.
 
@@ -212,7 +212,7 @@ desativar: `git config --unset core.hooksPath`.
 ```
 
 Desregistra o login item, remove o LaunchAgent de fallback (se
-existir), mata o processo, remove `~/Applications/Gota.app` e limpa
+existir), mata o processo, remove `~/Applications/Water Tracker.app` e limpa
 as preferências (`defaults delete com.vleineker.gota`).
 
 ## Debug do lembrete
@@ -249,7 +249,7 @@ você desligar depois). Pode exigir aprovação em **Ajustes do Sistema
 > Geral > Itens de Início**; o painel mostra um botão "Aprovar nos
 Ajustes" quando necessário.
 
-Se o registro pelo sistema falhar, o Gota grava um LaunchAgent de
+Se o registro pelo sistema falhar, o Water Tracker grava um LaunchAgent de
 reserva em `~/Library/LaunchAgents/com.vleineker.gota.plist`.
 Desligar "Abrir ao iniciar sessão" apaga esse arquivo, se ele
 existir.

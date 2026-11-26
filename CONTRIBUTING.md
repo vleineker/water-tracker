@@ -1,6 +1,6 @@
-# Contribuindo com o Gota
+# Contribuindo com o Water Tracker
 
-Obrigado pelo interesse. O Gota é pequeno de propósito: um app de barra de
+Obrigado pelo interesse. O Water Tracker é pequeno de propósito: um app de barra de
 menus que faz uma coisa. Mudança boa é a que deixa o app mais simples ou mais
 confiável; feature nova vale conversar numa issue antes.
 
@@ -21,7 +21,7 @@ Para mexer no Garmin, também precisa de Node 20 ou mais novo
 
 ```bash
 ./test.sh    # só os testes
-./build.sh   # testes, compila, instala em ~/Applications/Gota.app e abre
+./build.sh   # testes, compila, instala em ~/Applications/Water Tracker.app e abre
 ```
 
 O `build.sh` para se algum teste falhar. O ajudante do Garmin tem testes

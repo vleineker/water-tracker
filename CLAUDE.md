@@ -1,4 +1,4 @@
-# Gota (water-tracker)
+# Water Tracker (water-tracker)
 
 ## Agent skills
 
